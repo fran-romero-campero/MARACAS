@@ -18,6 +18,7 @@ if(mode == "histone_modification")
 } else if (mode == "transcription_factor")
 {
   mode.header <- "Transcription Factor"
+  mode.intro <- "transcription factor"
 }
 
 ## Document header
