@@ -268,10 +268,10 @@ then
    if [ $CONTROL == "yes" ]
    then
       echo "Peak calling with control sample"
-      macs2 callpeak -t chip.bam -c control.bam -f BAM --outdir . -n replicate_${CURRENT_REPLICATE} &> macs_output
+      macs2 callpeak -t chip.bam -c control.bam -f BAM --outdir . -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
    else
       echo "Peak calling without control sample"
-      macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} &> macs_output
+      macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
    fi
 
 else
