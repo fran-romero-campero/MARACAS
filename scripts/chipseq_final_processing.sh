@@ -65,7 +65,7 @@ then
                  --outFileFormat bigwig 
    
 else
-   cp $WD/${MAIN_FOLDER}/replicates/replicate_1_peaks.narrowPeak $WD/${MAIN_FOLDER}/results/output_peaks.narrowPeak
+   cp $WD/${MAIN_FOLDER}/replicates/replicate_1/replicate_1_peaks.narrowPeak $WD/${MAIN_FOLDER}/results/output_peaks.narrowPeak
 fi
 
 if [ $MODE == "histone_modification" ]
