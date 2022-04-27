@@ -77,6 +77,7 @@ then
 fi
 
 # Add rmarkdown dependency
+cd $WD/${MAIN_FOLDER}/results/
 Rscript -e "rmarkdown::render('ChIP_seq_analysis_report.Rmd', 'pdf_document')"
 Rscript -e "rmarkdown::render('ChIP_seq_analysis_report.Rmd', 'html_document')"
 
