@@ -196,7 +196,7 @@ else
 
    if [ $CONTROL == "yes" ]
    then
-      fastqc control_1.fastq
+      fastqc control_1.fastq.gz
       bowtie2 -p $NPROC -x $INDEX -U control_1.fastq.gz -S raw_control.sam &> control_mapping_stats_${CURRENT_REPLICATE}
    fi
 fi
