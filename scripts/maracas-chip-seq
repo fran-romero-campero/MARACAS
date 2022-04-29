@@ -466,24 +466,24 @@ then
    done
 
    echo ""
-   echo "***********************************"
-   echo "* ALL SAMPLES HAS BEEN PROCESSED! *"
-   echo "***********************************"
+   echo "************************************"
+   echo "* ALL SAMPLES HAVE BEEN PROCESSED! *"
+   echo "************************************"
    echo ""
 
-   echo "------------------------"
-echo "antes"
-echo "WD=" $WD
-echo "MAIN_FOLDER=" ${MAIN_FOLDER}
-echo "NUM_REPLICATES=" ${NUM_REPLICATES}
-echo "MODE=" $MODE
+#echo "------------------------"
+#echo "antes"
+#echo "WD=" $WD
+#echo "MAIN_FOLDER=" ${MAIN_FOLDER}
+#echo "NUM_REPLICATES=" ${NUM_REPLICATES}
+#echo "MODE=" $MODE
 ##echo "INS_DIR=" ${INS_DIR}
-echo "MICRO=" $MICROALGAE
-echo "HISTONE=" $HISTONE
-echo "TF=" $TF
-echo "INCLUDED_CONTROL=" ${INCLUDED_CONTROL}
-echo "NPROC=" $NPROC
-echo "----------------------"
+#echo "MICRO=" $MICROALGAE
+#echo "HISTONE=" $HISTONE
+#echo "TF=" $TF
+#echo "INCLUDED_CONTROL=" ${INCLUDED_CONTROL}
+#echo "NPROC=" $NPROC
+#echo "----------------------"
 
 
 
