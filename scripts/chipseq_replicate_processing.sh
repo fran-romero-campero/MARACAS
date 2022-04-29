@@ -280,7 +280,8 @@ else
    exit
 fi
 
-rm *.bam*
+# Remove bam files
+# rm *.bam*
 
 echo ""
 echo "************************"
