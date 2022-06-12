@@ -254,10 +254,117 @@ esac
 
 if [ $rna_seq_or_chip_seq -eq 1 ]
 then
- echo " User selected rna-seq"
+ echo "You have chosen to specify the parameters for a RNA-seq analysis."
+ echo ""
+ echo "Please enter the name of the experimental condition in your analysis:"
+ read experimental_condition_name
+ echo "experimental_condition_name: $experimental_condition_name"  >> $filename 
+ 
+ echo " "
+ echo "Please enter the number of replicates for your experimental condition"
+ echo "$experimental_condition_name :"
+ read experimental_replicate_number
+
+ if [[ $experimental_replicate_number =~ ^[0-9]+$ ]]
+  then
+   for i in $(seq 1 $experimental_replicate_number)
+   do
+    echo "condition_sample$i: $experimental_condition_name"  >> $filename
+    echo " "
+    echo "Please enter complete path including the fastq file for replicate $i"
+    echo "of the experimental condition $experimental_condition_name:"
+    read experimental_replicate_path
+    echo "loc_sample$i:" $experimental_replicate_path >> $filename
+   done
+  else
+   while  ! [[ $experimental_replicate_number =~ ^[0-9]+$ ]] 
+   do
+    echo " "
+    echo "Please enter the number of replicates for your experimental condition"
+    echo "$experimental_condition_name you did not enter a number:"
+    read experimental_replicate_number
+   done
+   for i in $(seq 1 $experimental_replicate_number)
+   do
+    echo "condition_sample$i: $experimental_condition_name"  >> $filename
+    echo " "
+    echo "Please enter complete path including the fastq file for replicate $i"
+    echo "of the experimental condition $experimental_condition_name:"
+    read experimental_replicate_path
+    echo "loc_sample$i:" $experimental_replicate_path >> $filename
+   done
+ fi
+ echo ""
+ echo "Please enter the name of the control condition in your analysis:"
+ read control_condition_name
+ echo "control_condition_name: $control_condition_name" >> $filename 
+ echo " "
+ echo "Please enter the number of replicates for your control condition"
+ echo "$control_condition_name :"
+ read control_replicate_number
+
+ if [[ $control_replicate_number =~ ^[0-9]+$ ]]
+  then
+   for i in $(seq 1 $control_replicate_number)
+   do
+    echo "condition_sample$i: $control_condition_name"  >> $filename
+    echo " "
+    echo "Please enter complete path including the fastq file for replicate $i"
+    echo "of the control condition $control_condition_name:"
+    read control_replicate_path
+    echo "loc_sample$i:" $control_replicate_path >> $filename
+   done
+  else
+   while  ! [[ $control_replicate_number =~ ^[0-9]+$ ]] 
+   do
+    echo " "
+    echo "Please enter the number of replicates for your control condition"
+    echo "$control_condition_name you did not enter a number:"
+    read control_replicate_number
+   done
+   for i in $(seq 1 $control_replicate_number)
+   do
+    echo "condition_sample$i: $control_condition_name"  >> $filename
+    echo " "
+    echo "Please enter complete path including the fastq file for replicate $i"
+    echo "of the control condition $experimental_condition_name:"
+    read control_replicate_path
+    echo "loc_sample$i:" $control_replicate_path >> $filename
+   done
+ fi
+ echo " "
+ echo "Parameters for Differential Gene Expression (DEG) analysis."
+ echo "Please enter the fold change threshold to determine differentially"
+ echo "expressed genes. Suggested values:"
+ echo " - Fold change 2: this is the most common value. A 2-fold increase or"
+ echo "   decrease in gene expression is used to determine activated/repressed"
+ echo "   gene in the experimental condition with respect to the control."
+ echo " - Fold change 4: this is a restrictive value. A 4-fold increase or"
+ echo "   decrease in gene expression is used to determine activated/repressed"
+ echo "   gene in the experimental condition with respect to the control."
+ echo " - Fold change 8: this is a very restrictive value only used when a"
+ echo "   massive change is expected in the experimental condition when compared"
+ echo "   to the control condition."
+ echo "Please enter your selected fold change threshold:"
+ read fold_change
+ echo "fold_change: $fold_change" >> $filename
+ echo " "
+ echo "Please enter the ajdusted p-value or q-value to determine differentially"
+ echo "expressed genes. Suggested values:"
+ echo " - q-value of 0.05: this is the most common value. A 95% signficance"
+ echo "   level in gene expression is used to determine activated/repressed"
+ echo "   gene in the experimental condition with respect to the control."
+ echo " - q-value of 0.1: this is a permissive value. A 90% signficance"
+ echo "   level in gene expression is used to determine activated/repressed"
+ echo "   gene in the experimental condition with respect to the control."
+ echo " - q-value of 1: Only the fold change criterion is used. No control over"
+ echo "   false positives. Very permissive criterion."
+ echo "Please enter your selected q-value threshold:"
+ read q_value
+ echo "q_value: $q_value" >> $filename
 elif [ $rna_seq_or_chip_seq -eq 2 ]
 then
- echo " Your have chosen to specify the parameters for a ChIP-seq analysis."
+ echo " You have chosen to specify the parameters for a ChIP-seq analysis."
  echo " "
 
 fi
