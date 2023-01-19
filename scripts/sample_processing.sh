@@ -309,3 +309,143 @@ echo ""
 fi
 
 fi #final
+
+
+
+############################# Sample processing with STAR ##################
+
+if [ "$MAPPER" == "STAR" ]
+then
+
+if [ -f ${ACC_NUMBER}_2.fastq.gz ]
+then
+
+   echo ""
+   echo "* Quality Analysis *"
+   echo "********************"
+   echo ""
+
+   fastqc ${ACC_NUMBER}_1.fastq.gz
+   fastqc ${ACC_NUMBER}_2.fastq.gz
+
+   echo ""
+   echo "*    Read Mapping  *"
+   echo "********************"
+   echo ""
+   gunzip *.fastq.gz
+   STAR --runThreadN $NPROC --genomeDir $INDEX --readFilesIn ${ACC_NUMBER}_1.fastq ${ACC_NUMBER}_2.fastq
+
+else
+
+   echo ""
+   echo "* Quality Analysis *"
+   echo "********************"
+   echo ""
+
+   fastqc ${ACC_NUMBER}_1.fastq.gz
+
+   echo ""
+   echo "* Read Mapping     *"
+   echo "********************"
+   echo ""
+   gunzip *.fastq.gz
+   STAR --runThreadN $NPROC --genomeDir $INDEX --readFilesIn ${ACC_NUMBER}_1.fastq
+fi
+
+gzip *.fastq
+
+echo ""
+echo "* Generating mapping signal in bigwig format *"
+echo "**********************************************"
+echo ""
+
+## Generting sorted bam file
+mv Aligned.out.sam ${ACC_NUMBER}.sam
+samtools sort -@ $NPROC -m 2G -o ${ACC_NUMBER}.bam ${ACC_NUMBER}.sam
+rm ${ACC_NUMBER}.sam
+samtools index -@ $NPROC ${ACC_NUMBER}.bam
+bamCoverage -p $NPROC -bs 10 --normalizeUsing CPM --bam ${ACC_NUMBER}.bam -o ${ACC_NUMBER}.bw
+
+## Transcript assembly
+echo ""
+echo "* Transcript assembly and gene expression estimation *"
+echo "******************************************************"
+echo ""
+
+stringtie -p $NRPOC -G $ANNOTATION -o ${ACC_NUMBER}.gtf -l ${ACC_NUMBER} ${ACC_NUMBER}.bam
+
+## Preparing merge list file for transcriptome merging
+echo ${SAMPLE_FOLDER}/${ACC_NUMBER}.gtf >> ../../results/merge_list.txt
+
+## Gene Expression Quantification
+stringtie -p $NPROC -e -B -G $ANNOTATION -o ${ACC_NUMBER}.gtf ${ACC_NUMBER}.bam
+rm ${ACC_NUMBER}.bam
+
+sed -i 's/#/HHAASSHH/g' t_data.ctab
+
+## Synchronization
+if [ $ARCH == "SLURM" ]
+then
+   ## Write in blackboard
+   echo "SAMPLE " ${CURRENT_REPLICATE} " DONE" >> ${SAMPLE_FOLDER}/../../logs/blackboard.txt
+
+   ## Count number of line in the blackboard to check the number of processed samples
+   PROCESSED_SAMPLES=$(wc -l ${SAMPLE_FOLDER}/../../logs/blackboard.txt | awk '{print $1}')
+
+   ## Submit scripts for transcriptome merging and differential gene expression
+   if [ ${PROCESSED_SAMPLES} -eq ${NUM_SAMPLES} ]
+   then
+
+      echo ""
+      echo "* Computing differential gene expression *"
+      echo "******************************************"
+      echo ""
+      Rscript $MARACAS/scripts/DE_analysis.R ${SAMPLE_FOLDER}/../ ${CONTROL} ${EXPERIMENTAL} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER
+
+      echo ""
+      echo "* Generating output reports *"
+      echo "*****************************"
+      echo ""
+
+      Rscript -e "rmarkdown::render('${SAMPLE_FOLDER}/../../results/DE_report.Rmd', 'pdf_document')"
+      Rscript -e "rmarkdown::render('${SAMPLE_FOLDER}/../../results/DE_report.Rmd', 'html_document')"
+
+      sed -i 's/HHAASSHH/#/g' ${SAMPLE_FOLDER}/../../results/*
+
+echo ""
+echo ""
+echo "**************************************************************************************************************"
+echo "*                                    ANALYSIS DONE!!!                                                        *"
+echo "* OUTPUT REPORTS IN HTML AND PDF FORMATS HAVE BEEN GENERATED IN THE FOLDER $WD/${MAIN_FOLDER}/results"
+echo "*                                  ENJOY YOUR RESULTS!!!                                                     *"
+echo "**************************************************************************************************************"
+echo ""
+echo ""
+echo ""
+echo "                                    ░░░░░░░░░░░░░░░░░░░░░░█████████"
+echo "                                    ░░███████░░░░░░░░░░███▒▒▒▒▒▒▒▒███"
+echo "                                    ░░█▒▒▒▒▒▒█░░░░░░░███▒▒▒▒▒▒▒▒▒▒▒▒▒███"
+echo "                                    ░░░█▒▒▒▒▒▒█░░░░██▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒██"
+echo "                                    ░░░░█▒▒▒▒▒█░░░██▒▒▒▒▒██▒▒▒▒▒▒██▒▒▒▒▒███"
+echo "                                    ░░░░░█▒▒▒█░░░█▒▒▒▒▒▒████▒▒▒▒████▒▒▒▒▒▒██"
+echo "                                    ░░░█████████████▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒██"
+echo "                                    ░░░█▒▒▒▒▒▒▒▒▒▒▒▒█▒▒▒▒▒▒▒▒▒█▒▒▒▒▒▒▒▒▒▒▒██"
+echo "                                    ░██▒▒▒▒▒▒▒▒▒▒▒▒▒█▒▒▒██▒▒▒▒▒▒▒▒▒▒██▒▒▒▒██"
+echo "                                    ██▒▒▒███████████▒▒▒▒▒██▒▒▒▒▒▒▒▒██▒▒▒▒▒██"
+echo "                                    █▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█▒▒▒▒▒▒████████▒▒▒▒▒▒▒██"
+echo "                                    ██▒▒▒▒▒▒▒▒▒▒▒▒▒▒█▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒██"
+echo "                                    ░█▒▒▒███████████▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒██"
+echo "                                    ░██▒▒▒▒▒▒▒▒▒▒████▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█"
+echo "                                    ░░████████████░░░█████████████████"
+echo ""
+echo ""
+echo ""
+
+
+
+
+   fi
+fi
+
+fi
+

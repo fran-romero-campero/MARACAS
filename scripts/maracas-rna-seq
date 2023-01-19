@@ -89,12 +89,12 @@ then
         echo "Ahora si es hisat2"
 fi
 
-if [ "$MAPPER" != "kallisto" ] && [ "$MAPPER" != "hisat2" ]
+if [ "$MAPPER" != "kallisto" ] && [ "$MAPPER" != "hisat2" ] && [ "$MAPPER" != "STAR" ]
 then
  	echo ""
 	echo "---------------------------------------------------"
 	echo "Read mapper not supported by MARACAS. Please use"
-	echo "hisat2 or kallisto instead."
+	echo "hisat2, STAR or kallisto instead."
 	echo "---------------------------------------------------"
 	echo ""
 fi

@@ -1,0 +1,77 @@
+STAR version=2.7.10b
+STAR compilation time,server,dir=2022-12-09T11:17:46+01:00 :/home/ricardo/tfm/STARrepository/STAR/source
+STAR git: On branch master ; commit 9ec8b7e2edc5568af432e43b0ac2e89cf15edb15 ; diff files: 
+##### Command Line:
+STAR --runThreadN 1 --runMode genomeGenerate --genomeDir . --genomeFastaFiles ../sin_pipeline/genome/test.fa --sjdbGTFfile ../sin_pipeline/annotation/test.gtf --genomeSAindexNbases 9
+##### Initial USER parameters from Command Line:
+###### All USER parameters from Command Line:
+runThreadN                    1     ~RE-DEFINED
+runMode                       genomeGenerate        ~RE-DEFINED
+genomeDir                     .     ~RE-DEFINED
+genomeFastaFiles              ../sin_pipeline/genome/test.fa        ~RE-DEFINED
+sjdbGTFfile                   ../sin_pipeline/annotation/test.gtf     ~RE-DEFINED
+genomeSAindexNbases           9     ~RE-DEFINED
+##### Finished reading parameters from all sources
+
+##### Final user re-defined parameters-----------------:
+runMode                           genomeGenerate   
+runThreadN                        1
+genomeDir                         .
+genomeFastaFiles                  ../sin_pipeline/genome/test.fa   
+genomeSAindexNbases               9
+sjdbGTFfile                       ../sin_pipeline/annotation/test.gtf
+
+-------------------------------
+##### Final effective command line:
+STAR   --runMode genomeGenerate      --runThreadN 1   --genomeDir .   --genomeFastaFiles ../sin_pipeline/genome/test.fa      --genomeSAindexNbases 9   --sjdbGTFfile ../sin_pipeline/annotation/test.gtf
+----------------------------------------
+
+Number of fastq files for each mate = 1
+ParametersSolo: --soloCellFilterType CellRanger2.2 filtering parameters:  3000 0.99 10
+Finished loading and checking parameters
+--genomeDir directory exists and will be overwritten: ./
+Jan 19 12:15:04 ... starting to generate Genome files
+../sin_pipeline/genome/test.fa : chr # 0  "1" chrStart: 0
+Chromosome sequence lengths: 
+1	1096037
+Genome sequence total length = 1096037
+Genome size with padding = 1310720
+Jan 19 12:15:04 ..... processing annotations GTF
+Processing pGe.sjdbGTFfile=../sin_pipeline/annotation/test.gtf, found:
+		673 transcripts
+		826 exons (non-collapsed)
+		153 collapsed junctions
+Total junctions: 153
+Jan 19 12:15:05 ..... finished GTF processing
+
+Estimated genome size with padding and SJs: total=genome+SJ=202310720 = 1310720 + 201000000
+GstrandBit=32
+Number of SA indices: 2190474
+Jan 19 12:15:05 ... starting to sort Suffix Array. This may take a long time...
+Number of chunks: 1;   chunks size limit: 18598427016 bytes
+Jan 19 12:15:05 ... sorting Suffix Array chunks and saving them to disk...
+Writing 17523792 bytes into .//SA_0 ; empty space on disk = 229065932800 bytes ... done
+Jan 19 12:15:05 ... loading chunks from disk, packing SA...
+Jan 19 12:15:05 ... finished generating suffix array
+Jan 19 12:15:05 ... generating Suffix Array index
+Jan 19 12:15:05 ... completed Suffix Array index
+Jan 19 12:15:05   Finished preparing junctions
+Jan 19 12:15:05 ..... inserting junctions into the genome indices
+Jan 19 12:15:05   Finished SA search: number of new junctions=153, old junctions=0
+Jan 19 12:15:05   Finished sorting SA indicesL nInd=61200
+Genome size with junctions=1341473  1310720   30753
+GstrandBit1=32   GstrandBit=32
+Jan 19 12:15:05   Finished inserting junction indices
+Jan 19 12:15:05   Finished SAi
+Jan 19 12:15:05 ..... finished inserting junctions into genome
+Jan 19 12:15:05 ... writing Genome to disk ...
+Writing 1341473 bytes into .//Genome ; empty space on disk = 229067276288 bytes ... done
+SA size in bytes: 9288159
+Jan 19 12:15:05 ... writing Suffix Array to disk ...
+Writing 9288159 bytes into .//SA ; empty space on disk = 229075222528 bytes ... done
+Jan 19 12:15:05 ... writing SAindex to disk
+Writing 8 bytes into .//SAindex ; empty space on disk = 229066317824 bytes ... done
+Writing 80 bytes into .//SAindex ; empty space on disk = 229066317824 bytes ... done
+Writing 1529171 bytes into .//SAindex ; empty space on disk = 229066317824 bytes ... done
+Jan 19 12:15:05 ..... finished successfully
+DONE: Genome generation, EXITING
