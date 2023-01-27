@@ -91,8 +91,9 @@ for(i in 1:nrow(experimental.design))
 
 ## Extract basic statistics for the result of each sample processing
 ## TODO!!!!!
+print("Primer if")
 
-if (mapper == "hisat2")
+if (mapper == "hisat2" || mapper == "STAR")
 {
   ## Load results from hisat2 + stringtie
   bg.data <- ballgown(dataDir = ".", samplePattern = "sample", pData=experimental.design)
@@ -199,7 +200,8 @@ ggarrange(plotlist = myPlots, nrow = number.samples, ncol = number.samples)
 dev.off()
 
 ## Boxplot before normalization
-if(mapper == "hisat2")
+print("Segundo if")
+if(mapper == "hisat2" || mapper == "STAR")
 {
   png(filename = "../results/boxplot_before_normalization.png")
 # boxplot(log2(gene.expression + 1),col=rainbow(ncol(gene.expression)),ylab="log2(FPKM + 1)",cex.lab=1.5,las=2,outline=F)
@@ -344,7 +346,9 @@ for(i in 1:ncol(gene.expression))
 ## Log2 transformation
 log.gene.expression <- log2(gene.expression+1)
 
-if (mapper == "hisat2")
+print("Tercer if")
+
+if (mapper == "hisat2" || mapper == "STAR")
 {
    png(filename = "../results/boxplot_after_normalization.png")
    # boxplot(log.gene.expression,col=rainbow(ncol(gene.expression)),ylab="log2(FPKM + 1)",cex.lab=1.5,outline=F,las=2,main="Normalized Gene Expression")
@@ -738,6 +742,9 @@ write(x = intro.line,file = output.file,append = T)
 ## Experimental design
 number.samples <- nrow(experimental.design)
 
+print("Cuarto if")
+
+
 for(i in 1:number.samples)
 {
   write(x = paste(c("* **", experimental.design$sample[i], "** for condition ",
@@ -747,7 +754,7 @@ for(i in 1:number.samples)
                   experimental.design$sample[i],
                   "/sample_1_fastqc.html), "), collapse=""), 
         file=output.file, append=T)
-  if( mapper == "hisat2")
+  if( mapper == "hisat2" || mapper == "STAR")
   {
     write(x=paste(c("[BigWig file with mapping signal](../samples/",
                     experimental.design$sample[i],"/sample.bw)"),
@@ -766,6 +773,18 @@ for(i in 1:number.samples)
       write(x=paste(c("\t",mapping.stats[j],"\n"),collapse = ""),file=output.file, append=T)
     }
   }
+  if( mapper == "STAR")
+  {
+
+    mapping.stats <- readLines(con = paste(c( experimental.design$sample[i],
+                                              "/Log.final.out"),collapse=""),n = 37)
+    write(x = "\n",file=output.file, append=T)
+    for(j in 1:37)
+    {
+      write(x=paste(c("\t",mapping.stats[j],"\n"),collapse = ""),file=output.file, append=T)
+    }
+  }
+
   #write(x = paste(c("\t",mapping.stats[6]),collapse = ""),file=output.file, append=T)
   write(x = "\n",file=output.file, append=T)
 }
@@ -773,7 +792,9 @@ for(i in 1:number.samples)
 write(x = "\n",file=output.file, append=T)
 write(x = "\n",file=output.file, append=T)
 
-if (mapper == "hisat2")
+print("Quinto if")
+
+if (mapper == "hisat2" || mapper == "STAR")
 {
    write(x="[**Click here to download a matrix in tab-separated value format containing 
    estimates for gene expression computed from your RNA-seq data measured as FPKM. Rows represent genes
