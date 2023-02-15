@@ -80,6 +80,9 @@ NUM_SAMPLES=$(grep number_of_samples: $PARAMS | awk '{ print $2 }')
 ## Load microalgae
 MICROALGAE=$(grep microalgae: $PARAMS | awk '{ print $2 }')
 
+## Load DE analysis package option
+DEANALYSIS=$(grep DEanalysis_package: $PARAMS | awk '{ print $2 }')
+
 ## Load read mapper
 MAPPER=$(grep read_mapper: $PARAMS | awk '{ print $2 }')
 
@@ -458,15 +461,21 @@ then
    echo "******************************************"
    echo ""
    
-   Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_COND} ${EXPERIMENTAL_COND} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER
+   Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_COND} ${EXPERIMENTAL_COND} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER $DEANALYSIS
    
    echo ""
    echo "* Generating output reports *" 
    echo "*****************************"
    echo ""
-   
-   Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_report.Rmd', 'pdf_document')" 
-   Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_report.Rmd', 'html_document')" 	
+   if [ $DEANALYSIS == "limma" ]
+   then
+   	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_limma_report.Rmd', 'pdf_document')"
+   	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_limma_report.Rmd', 'html_document')"
+   else
+	echo "hola"
+#	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_deseq2_report.Rmd', 'pdf_document')"
+#       Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_deseq2_report.Rmd', 'html_document')"
+   fi
 fi
 
 echo ""
