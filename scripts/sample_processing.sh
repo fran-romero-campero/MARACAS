@@ -56,10 +56,11 @@ then
    echo "* Quality Analysis *" 
    echo "********************"
    echo ""
-   
+
    fastqc ${ACC_NUMBER}_1.fastq.gz
    fastqc ${ACC_NUMBER}_2.fastq.gz
-   
+
+
    echo ""
    echo "*    Read Mapping  *" 
    echo "********************"
@@ -74,12 +75,12 @@ else
    echo ""
 
    fastqc ${ACC_NUMBER}_1.fastq.gz
-   
+
    echo ""
    echo "* Read Mapping     *" 
    echo "********************"
    echo ""
-   
+ 
    hisat2 -p $NPROC --dta -x $INDEX -U ${ACC_NUMBER}_1.fastq.gz -S ${ACC_NUMBER}.sam --summary-file mapping_stats
 fi
 
@@ -342,7 +343,7 @@ else
    echo "********************"
    echo ""
 
-   fastqc ${ACC_NUMBER}_1.fastq.gz
+#   fastqc ${ACC_NUMBER}_1.fastq.gz
 
    echo ""
    echo "* Read Mapping     *"

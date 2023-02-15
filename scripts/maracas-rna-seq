@@ -38,7 +38,7 @@ echo "                               (__/ \__)                            "
 echo ""
 echo ""
 
-sleep 10s
+#sleep 10s
 
 if [ $# -ne 1 ];
 then
@@ -448,7 +448,7 @@ then
          fi
    done
 
-   if [ $MAPPER == "hisat2" ]
+   if [ $MAPPER == "hisat2" -o  $MAPPER == "STAR" ]
    then	
          bash $MARACAS/scripts/transcriptome_merging.sh $WD/${MAIN_FOLDER} $MARACAS/data/${MICROALGAE}/annotation/${MICROALGAE}.gtf
    fi

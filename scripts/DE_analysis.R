@@ -91,7 +91,6 @@ for(i in 1:nrow(experimental.design))
 
 ## Extract basic statistics for the result of each sample processing
 ## TODO!!!!!
-print("Primer if")
 
 if (mapper == "hisat2" || mapper == "STAR")
 {
@@ -200,7 +199,7 @@ ggarrange(plotlist = myPlots, nrow = number.samples, ncol = number.samples)
 dev.off()
 
 ## Boxplot before normalization
-print("Segundo if")
+
 if(mapper == "hisat2" || mapper == "STAR")
 {
   png(filename = "../results/boxplot_before_normalization.png")
@@ -345,8 +344,6 @@ for(i in 1:ncol(gene.expression))
 
 ## Log2 transformation
 log.gene.expression <- log2(gene.expression+1)
-
-print("Tercer if")
 
 if (mapper == "hisat2" || mapper == "STAR")
 {
@@ -570,7 +567,6 @@ mean.expression<-as.data.frame(mean.expression)
 mean.expression[,"gene_type"] <- "ns" 
 mean.expression[,"gene_name"] <- rownames(mean.expression)
 
-
 mean.expression[which(mean.expression$high_light - mean.expression$control > fc.threshold),"gene_type"] <- "activado"
 mean.expression[which(mean.expression$high_light - mean.expression$control < -(fc.threshold)),"gene_type"] <- "reprimido"
 
@@ -615,7 +611,6 @@ scatterplot_DEG <- ggplotly(scatterplot_DEG,x = ~control, y = ~experimental,
                             width = 550, height = 600)
 
 htmlwidgets::saveWidget(as_widget(scatterplot_DEG), "../results/scatterplot_DEG.html")
-
 
 
 log10.qval <- -log10(q.values)
@@ -713,6 +708,9 @@ points(rep(xpos[2],length(experimental.expr.vals))+0.1,experimental.expr.vals)
 dev.off()
 }
 
+
+
+
 ## Generation of Rmd file for final report
 output.file <- "../results/DE_report.Rmd"
 
@@ -741,9 +739,6 @@ write(x = intro.line,file = output.file,append = T)
 
 ## Experimental design
 number.samples <- nrow(experimental.design)
-
-print("Cuarto if")
-
 
 for(i in 1:number.samples)
 {
@@ -792,8 +787,6 @@ for(i in 1:number.samples)
 write(x = "\n",file=output.file, append=T)
 write(x = "\n",file=output.file, append=T)
 
-print("Quinto if")
-
 if (mapper == "hisat2" || mapper == "STAR")
 {
    write(x="[**Click here to download a matrix in tab-separated value format containing 
@@ -822,8 +815,6 @@ write(x = "![Normalized Global Gene Expression](./boxplot_after_normalization.pn
 write(x = "</center>", file=output.file, append=T)
 write(x = "[**Click here to explore an interactive plot**](./boxplot_after.html){ width=50% }", file=output.file, append=T)
 write(x = "</center>", file=output.file, append=T)
-
-
 
 ## Principal components analysis
 write(x = "\n", file=output.file, append=T)
@@ -875,8 +866,6 @@ write(x = "[**Click here to explore an interactive plot**](./scatterplot_DEG.htm
 write(x = "</center>", file=output.file, append=T)
 
 
-
-
 write(x = "<center>", file=output.file, append=T)
 write(x = "![Scatter Plot](./volcano_plot.png){ width=50% }", file=output.file, append=T)
 write(x = "</center>", file=output.file, append=T)
@@ -901,3 +890,50 @@ write(x = "* [**Click here to download the list of activated genes.**](./activat
       file = output.file,append = T)
 write(x = "* [**Click here to download the list of repressed genes.**](./repressed_genes.txt)\n",
       file = output.file,append = T)
+
+
+# **************** USING DESEQ2 ******************
+BiocManager::install("DESeq2")
+
+library(DESeq2)
+
+gene.count.matrix <- read.table(file = "gene_count_matrix.csv",header = T,sep = ",")
+# gene.ids <- sapply(X = strsplit(x = gene.count.matrix$gene_id,split = "\\|"),FUN = function(x){return(x[1])})
+
+gene.ids <- gene.count.matrix$gene_id
+gene.ids
+
+gene.count.matrix <- gene.count.matrix[,-1]
+rownames(gene.count.matrix) <- gene.ids
+rownames(experimental.design) <- experimental.design$sample
+
+gene.count.matrix <- as.matrix(gene.count.matrix)
+dds <- DESeqDataSetFromMatrix(countData=gene.count.matrix, colData=experimental.design, design = ~ condition)
+dds$condition <- relevel(dds$condition, ref = "control")
+
+
+dds <- DESeq(dds) 
+res <- results(dds) 
+
+log.fold.change <- res$log2FoldChange
+q.value <- res$padj
+
+activated.genes.deseq2 <- row.names(res)[log.fold.change > fc.threshold & q.value < q.val.threshold]
+activated.genes.deseq2 <- activated.genes.deseq2[!is.na(activated.genes.deseq2)]
+
+repressed.genes.deseq2 <- row.names(res)[log.fold.change < - fc.threshold & q.value < q.val.threshold]
+repressed.genes.deseq2 <- repressed.genes.deseq2[!is.na(repressed.genes.deseq2)]
+
+print("numero genes")
+length(activated.genes.deseq2)
+length(repressed.genes.deseq2)
+
+write.table(x = activated.genes.deseq2, file = "../results/activated_genes_deseq2.txt", quote = F, row.names = F, col.names = F)
+write.table(x = repressed.genes.deseq2, file = "../results/repressed_genes_deseq2.txt", quote = F, row.names = F, col.names = F)
+
+
+
+
+
+
+
