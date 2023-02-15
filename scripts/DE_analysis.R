@@ -893,11 +893,9 @@ write(x = "* [**Click here to download the list of repressed genes.**](./repress
 
 
 # **************** USING DESEQ2 ******************
-BiocManager::install("DESeq2")
-
 library(DESeq2)
 
-gene.count.matrix <- read.table(file = "gene_count_matrix.csv",header = T,sep = ",")
+gene.count.matrix <- read.table(file = "../results/gene_count_matrix.csv",header = T,sep = ",")
 # gene.ids <- sapply(X = strsplit(x = gene.count.matrix$gene_id,split = "\\|"),FUN = function(x){return(x[1])})
 
 gene.ids <- gene.count.matrix$gene_id
@@ -909,7 +907,8 @@ rownames(experimental.design) <- experimental.design$sample
 
 gene.count.matrix <- as.matrix(gene.count.matrix)
 dds <- DESeqDataSetFromMatrix(countData=gene.count.matrix, colData=experimental.design, design = ~ condition)
-dds$condition <- relevel(dds$condition, ref = "control")
+
+dds$condition <- relevel(dds$condition, ref = control.condition)
 
 
 dds <- DESeq(dds) 
