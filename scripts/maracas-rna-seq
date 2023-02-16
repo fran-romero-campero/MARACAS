@@ -162,6 +162,7 @@ echo "The following parameters were loaded."
 echo " - Working directory: " $WD
 echo " - Main folder: " $MAIN_FOLDER
 echo " - Microalgae: " $MICROALGAE
+echo " - DE analysis package: " $DEANALYSIS
 echo " - Read Mapper: " $MAPPER
 echo " - Architecture where script will be run: " $ARCH
 echo " - Number of processors: " $NPROC
@@ -467,15 +468,8 @@ then
    echo "* Generating output reports *" 
    echo "*****************************"
    echo ""
-   if [ $DEANALYSIS == "limma" ]
-   then
-   	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_limma_report.Rmd', 'pdf_document')"
-   	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_limma_report.Rmd', 'html_document')"
-   else
-	echo "hola"
-#	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_deseq2_report.Rmd', 'pdf_document')"
-#       Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_deseq2_report.Rmd', 'html_document')"
-   fi
+   Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_report.Rmd', 'pdf_document')"
+   Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_report.Rmd', 'html_document')"
 fi
 
 echo ""

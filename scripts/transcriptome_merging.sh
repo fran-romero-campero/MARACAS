@@ -10,10 +10,6 @@ ANNOTATION=$2
 ## Access results folder
 cd ${EXP_FOLDER}/results
 
-## Getting gene count matrix
-echo "PREPDE"
-prepDE.py -i ../samples
-
 ## Merging sample transcriptomes
 stringtie --merge -G $ANNOTATION -o stringtie_merged.gtf merge_list.txt
 
