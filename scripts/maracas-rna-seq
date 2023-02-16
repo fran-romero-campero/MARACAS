@@ -83,6 +83,12 @@ MICROALGAE=$(grep microalgae: $PARAMS | awk '{ print $2 }')
 ## Load DE analysis package option
 DEANALYSIS=$(grep DEanalysis_package: $PARAMS | awk '{ print $2 }')
 
+if [ -z $DEANALYSIS ] 
+then
+    	DEANALYSIS="limma"
+	echo "Ahora si es limma"
+fi
+
 ## Load read mapper
 MAPPER=$(grep read_mapper: $PARAMS | awk '{ print $2 }')
 
