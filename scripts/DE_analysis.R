@@ -763,12 +763,12 @@ png(filename = "../results/volcano_plot.png")
 
 de.results[,"gene_type"] <- "ns"
 de.results[,"gene_name"] <- rownames(de.results)
-de.results[which(de.results$log2FoldChange > 2 & de.results$padj < 0.01),"gene_type"] <- "activado"
-de.results[which(de.results$log2FoldChange< -2 & de.results$padj < 0.01),"gene_type"] <- "reprimido"
+de.results[which(de.results$log2FoldChange > fc.threshold & de.results$padj < q.val.threshold),"gene_type"] <- "activated"
+de.results[which(de.results$log2FoldChange< -fc.threshold & de.results$padj < q.val.threshold),"gene_type"] <- "repressed"
 
 # volcol <- c("#dd5129", "#0f7ba2","grey33")
 volcol <- c(met.brewer("Egypt",3)[1], met.brewer("Egypt",3)[2],"grey33")
- names(volcol) <- c("activado","reprimido","ns")
+ names(volcol) <- c("activated","repressed","ns")
 
 print(ggplot(as.data.frame(de.results), aes(x=log2FoldChange , y=-log10(padj),
                                                    color=gene_type)) +
