@@ -85,8 +85,18 @@ DEANALYSIS=$(grep DEanalysis_package: $PARAMS | awk '{ print $2 }')
 
 if [ -z $DEANALYSIS ] 
 then
-    	DEANALYSIS="limma"
-	echo "Ahora si es limma"
+    	DEANALYSIS="DESeq2"
+	echo "No DE analysis parameter specified. DESeq2 will be used"
+fi
+
+if [ "$DEANALYSIS" != "limma" ] && [ "$DEANALYSIS" != "DESeq2" ]
+then
+ 	echo ""
+	echo "------------------------------------------------------------"
+	echo "DE analysis package not supported by MARACAS. Please use"
+	echo "DESeq2 or limma instead."
+	echo "------------------------------------------------------------"
+	echo ""
 fi
 
 ## Load read mapper
@@ -95,7 +105,7 @@ MAPPER=$(grep read_mapper: $PARAMS | awk '{ print $2 }')
 if [ -z $MAPPER ] 
 then
     	MAPPER="hisat2"
-        echo "Ahora si es hisat2"
+        echo "No mapper specified. hisat2 will be used"
 fi
 
 if [ "$MAPPER" != "kallisto" ] && [ "$MAPPER" != "hisat2" ] && [ "$MAPPER" != "STAR" ]
