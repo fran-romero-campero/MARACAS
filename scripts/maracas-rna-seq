@@ -8,6 +8,7 @@
 
 ## Input file name
 PARAMS=$1
+FIRST_FOLDER=`pwd`
 
 echo ""
 echo ""
@@ -75,7 +76,7 @@ eval WD=$(grep working_directory: $PARAMS | awk '{ print $2 }')
 MAIN_FOLDER=$(grep main_folder: $PARAMS | awk '{ print $2 }')
 
 ## Load number of samples
-NUM_SAMPLES=$(grep number_of_samples: $PARAMS | awk '{ print $2 }')
+NUM_SAMPLES=$(grep loc_sample $PARAMS | wc -l)
 
 ## Load microalgae
 MICROALGAE=$(grep microalgae: $PARAMS | awk '{ print $2 }')
@@ -151,16 +152,17 @@ then
 	done
 fi
 
-## Load control condition name
-CONTROL_COND=$(grep control_condition_name: $PARAMS | awk '{ print $2 }')
-## Load experimental condition name
-EXPERIMENTAL_COND=$(grep experimental_condition_name: $PARAMS | awk '{ print $2 }')
-## Load experimental design consisting of sample conditions
-EXPERIMENTAL_DESIGN=()
-for i in `seq 0 $((${NUM_SAMPLES} - 1))`
+## Load numbero of comparisons
+NUM_COMPS=$(grep conditions_name $PARAMS | wc -l)
+
+## Load conditions names
+for i in `seq 0 $((${NUM_COMPS} - 1))`
 do
-   EXPERIMENTAL_DESIGN[$i]=$(grep condition_sample$(($i + 1)): $PARAMS | awk '{ print $2 }')
-done 
+  CONDITIONS[$i]=$(grep conditions_name$(($i + 1)): $PARAMS | awk '{ print $2 }')
+  CONTROL_CONDS[$i]=$(grep control_condition_name$(($i + 1)): $PARAMS | awk '{ print $2 }')
+  EXPERIMENTAL_CONDS[$i]=$(grep experimental_condition_name$(($i + 1)): $PARAMS | awk '{ print $2 }')
+done
+
 ## Load parameters for differential analysis
 FOLD_CHANGE=$(grep fold_change: $PARAMS | awk '{ print $2 }')
 Q_VALUE=$(grep q_value: $PARAMS | awk '{ print $2 }')
@@ -174,7 +176,7 @@ NPROC=$(grep number_processors: $PARAMS | awk '{ print $2}')
 echo ""
 echo "---------------------------------------------------"
 echo "The following parameters were loaded."
-##echo " - Installation directory: " $INS_DIR
+
 echo " - Working directory: " $WD
 echo " - Main folder: " $MAIN_FOLDER
 echo " - Microalgae: " $MICROALGAE
@@ -192,16 +194,16 @@ else
         echo ${LOC_SAMPLES_RIGHT[@]}
 fi
 
-
 if [ $DATA == "FILES" ] && [ $PAIRED == "TRUE" ]
 then
 	echo " - Sample locations: " ${LOC_SAMPLES_LEFT[@]}
 	echo ${LOC_SAMPLES_RIGHT[@]}
 fi
 
-echo " - Control condition name: " ${CONTROL_COND}
-echo " - Experimental condition name: " ${EXPERIMENTAL_COND} 
-echo " - Experimental design: " ${EXPERIMENTAL_DESIGN[@]}
+echo " - Number of comparisons; " $NUM_COMPS
+echo " - Conditions names: " ${CONDITIONS[@]}
+echo " - Control conditions names: " ${CONTROL_CONDS[@]}
+echo " - Experimental conditions names: " ${EXPERIMENTAL_CONDS[@]} 
 echo "---------------------------------------------------"
 echo ""
 
@@ -237,14 +239,29 @@ done
 ## Create experimental design file
 cd $WD/${MAIN_FOLDER}/samples
 
-echo "sample,condition" > experimental_design.csv
-for i in `seq 0 $((${NUM_SAMPLES} -1))`
+CONDS2=()
+for i in `seq 0 $((${NUM_COMPS} - 1))`
 do
-   echo "sample"_$(($i + 1)),${EXPERIMENTAL_DESIGN[$i]} >> experimental_design.csv
+   CONDS2[$i]=","${CONDITIONS[$i]}
+done
+
+echo "sample" ${CONDS2[@]} > experimental_design.csv
+
+for i in `seq 0 $((${NUM_SAMPLES} - 1))`
+do
+   EXPERIMENTAL_DESIGN=()
+   for j in `seq 1 ${NUM_COMPS}`
+   do
+      EXPERIMENTAL_DESIGN[$(($j -1))]=","$(grep condition${j}_sample$(($i + 1)): $FIRST_FOLDER/$PARAMS | awk '{ print $2 }')
+   done
+   echo "sample"_$(($i + 1)) ${EXPERIMENTAL_DESIGN[@]} >> experimental_design.csv
 done
 
 echo "Working Directory Structure Generated!"
 echo " "
+
+exit
+
 if [ $ARCH == "SLURM" ]
 then
 
