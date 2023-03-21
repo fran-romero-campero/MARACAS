@@ -34,12 +34,16 @@ args <- commandArgs(trailingOnly=TRUE)
 
 working.directory <- args[1]
 control.condition <- args[2]
+control.condition
 experimental.condition <- args[3]
+experimental.condition
 fc.threshold <- as.numeric(args[4])
 q.val.threshold <- as.numeric(args[5])
 microalgae <- args[6]
 mapper <- args[7]
 DEanalysis <- args[8]
+condition <- args[9]
+condition
 setwd(working.directory)
 
 ## Load libraries
@@ -63,9 +67,12 @@ number.samples <- nrow(experimental.design)
 sorted.samples <- sort(experimental.design$sample,ind=T)
 indeces.sorted.samples <- sorted.samples$ix
 experimental.design <- experimental.design[indeces.sorted.samples,]
+experimental.design
 
 number.samples <- nrow(experimental.design)
-number.replicates <- table(experimental.design$condition)
+experimental.design[[condition]]
+number.replicates <- table(experimental.design[[condition]])
+number.replicates
 control.replicates <- number.replicates[[control.condition]]
 experimental.replicates <- number.replicates[[experimental.condition]]
 sample.labels <- vector(mode="character",length = nrow(experimental.design))
@@ -77,12 +84,12 @@ j <- 1
 k <- 1
 for(i in 1:nrow(experimental.design))
 {
-  if(experimental.design$condition[i] == control.condition)
+  if(experimental.design[[condition]][i] == control.condition)
   {
     sample.labels[i] <- paste(control.condition,j,sep="_")
     control.indeces[j] <- i
     j <- j + 1
-  } else if (experimental.design$condition[i] == experimental.condition)
+  } else if (experimental.design[[condition]][i] == experimental.condition)
   {
     sample.labels[i] <- paste(experimental.condition,k,sep="_")
     experimental.indeces[k] <- i
@@ -312,7 +319,7 @@ fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 70),main = "")
 dev.off()
 
 png(filename = "../results/pca_analysis_2.png")
-fviz_pca_ind(res.pca, col.ind = experimental.design$condition, 
+fviz_pca_ind(res.pca, col.ind = experimental.design[[condition]], 
              pointsize=2, pointshape=21,fill="black",
              repel = TRUE, 
              addEllipses = TRUE,ellipse.type = "confidence",
@@ -812,10 +819,10 @@ htmlwidgets::saveWidget(as_widget(volcano_DEG), "../results/volcano_DEG.html")
 # ******************** REPORT *********************
 
 ## Generation of Rmd file for final report
-output.file <- "../results/DE_report.Rmd"
+output.file <- paste0("../results/comparison_by_", comparison, "/DE_report.Rmd")
 
 ## Document header
-header <- paste0(paste0("# **Differential Gene Expression Report for ", microalgae), "**")
+header <- paste0(paste0("# **Differential Gene Expression Report for ", microalgae), "in variable ",comparison ," conditions**")
 
 ## Introduction test
 write(x = header,file = output.file,append = F)
@@ -841,7 +848,7 @@ number.samples <- nrow(experimental.design)
 for(i in 1:number.samples)
 {
   write(x = paste(c("* **", experimental.design$sample[i], "** for condition ",
-                    "**", experimental.design$condition[i], "**:"),collapse=""),file = output.file,
+                    "**", experimental.design[[condition]][i], "**:"),collapse=""),file = output.file,
         append = T)
   write(x=paste(c("[Quality Control analysis](../samples/",
                   experimental.design$sample[i],

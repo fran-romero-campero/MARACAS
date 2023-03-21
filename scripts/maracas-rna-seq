@@ -129,14 +129,14 @@ if [ $DATA == "DB" ]
 then
 	ACC_SAMPLES=()
 	for i in `seq 0 $((${NUM_SAMPLES} - 1))`
-	do   
+	do
    	ACC_SAMPLES[$i]=$(grep acc_sample$(($i +1)): $PARAMS | awk '{ print $2 }')
 	done
 elif [ $DATA == "FILES" ] && [ $PAIRED == "FALSE" ]
 then
 	LOC_SAMPLES=()
 	for i in `seq 0 $((${NUM_SAMPLES} - 1))`
-	do   
+	do
    	eval LOC_SAMPLES[$i]=$(grep loc_sample$(($i +1)): $PARAMS | awk '{ print $2 }')
 		ACC_SAMPLES[$i]=sample$(($i+1))
 	done
@@ -145,14 +145,14 @@ then
 	LOC_SAMPLES_LEFT=()
 	LOC_SAMPLES_RIGHT=()
 	for i in `seq 0 $((${NUM_SAMPLES} - 1))`
-	do   
+	do
    	LOC_SAMPLES_LEFT[$i]=$(grep loc_sample_left$(($i +1)): $PARAMS | awk '{ print $2 }')
    	LOC_SAMPLES_RIGHT[$i]=$(grep loc_sample_right$(($i +1)): $PARAMS | awk '{ print $2 }')
 		ACC_SAMPLES[$i]=sample$(($i+1))
 	done
 fi
 
-## Load numbero of comparisons
+## Load number of comparisons
 NUM_COMPS=$(grep conditions_name $PARAMS | wc -l)
 
 ## Load conditions names
@@ -189,19 +189,21 @@ echo " - Paired data: " $PAIRED
 if [ $DATA == "DB" ]
 then
 	echo " - Sample accession numbers: " ${ACC_SAMPLES[@]}
-else
-	echo " - Sample locations: " ${LOC_SAMPLES_LEFT[@]}
-        echo ${LOC_SAMPLES_RIGHT[@]}
-fi
-
-if [ $DATA == "FILES" ] && [ $PAIRED == "TRUE" ]
+elif [ $DATA == "FILES" ] && [ $PAIRED == "FALSE" ]
+then
+   echo " - Sample locations:"
+   for i in `seq 0 $(($NUM_SAMPLES - 1))`
+   do
+	echo "   "${ACC_SAMPLES[$i]}: ${LOC_SAMPLES[$i]}
+   done
+elif [ $DATA == "FILES" ] && [ $PAIRED == "TRUE" ]
 then
 	echo " - Sample locations: " ${LOC_SAMPLES_LEFT[@]}
 	echo ${LOC_SAMPLES_RIGHT[@]}
 fi
 
-echo " - Number of comparisons; " $NUM_COMPS
-echo " - Conditions names: " ${CONDITIONS[@]}
+echo " - Number of comparisons: " $NUM_COMPS
+echo " - Comparisons names: " ${CONDITIONS[@]}
 echo " - Control conditions names: " ${CONTROL_CONDS[@]}
 echo " - Experimental conditions names: " ${EXPERIMENTAL_CONDS[@]} 
 echo "---------------------------------------------------"
@@ -220,13 +222,16 @@ echo ""
 
 ## Access working directory
 cd $WD
+echo "Accessing working directory"
 
 ## Create and access main folder
 mkdir ${MAIN_FOLDER}
 cd ${MAIN_FOLDER}
+echo "Creating and accessing main folder"
 
 ## Create subfolders
 mkdir samples results logs
+echo "Creating subfolders"
 
 ## Create folder for each sample
 cd samples
@@ -237,30 +242,33 @@ do
 done
 
 ## Create experimental design file
+echo "Creating experimental design file"
 cd $WD/${MAIN_FOLDER}/samples
 
 CONDS2=()
 for i in `seq 0 $((${NUM_COMPS} - 1))`
 do
-   CONDS2[$i]=","${CONDITIONS[$i]}
+   CONDS2[$i]=${CONDITIONS[$i]}
 done
 
-echo "sample" ${CONDS2[@]} > experimental_design.csv
+echo "sample" ${CONDS2[@]} > experimental_design_naive.csv
 
 for i in `seq 0 $((${NUM_SAMPLES} - 1))`
 do
    EXPERIMENTAL_DESIGN=()
    for j in `seq 1 ${NUM_COMPS}`
    do
-      EXPERIMENTAL_DESIGN[$(($j -1))]=","$(grep condition${j}_sample$(($i + 1)): $FIRST_FOLDER/$PARAMS | awk '{ print $2 }')
+      EXPERIMENTAL_DESIGN[$(($j -1))]=$(grep condition${j}_sample$(($i + 1)): $FIRST_FOLDER/$PARAMS | awk '{ print $2 }')
    done
-   echo "sample"_$(($i + 1)) ${EXPERIMENTAL_DESIGN[@]} >> experimental_design.csv
+   echo "sample"_$(($i + 1)) ${EXPERIMENTAL_DESIGN[@]} >> experimental_design_naive.csv
 done
+
+cat experimental_design_naive.csv | sed -e 's/ /,/g'  > experimental_design.csv
+
+rm experimental_design_naive.csv
 
 echo "Working Directory Structure Generated!"
 echo " "
-
-exit
 
 if [ $ARCH == "SLURM" ]
 then
@@ -410,7 +418,7 @@ then
 elif [ $ARCH == "SERVER" ]
 then
 
-   ## Sequential sample processing   
+   ## Sequential sample processing
    echo ""
    echo "------------------------------------------"
    echo "------------------------------------------"
@@ -418,17 +426,16 @@ then
    echo "------------------------------------------"
    echo "------------------------------------------"
    echo ""
-   
-   
+
    for  i in `seq 0 $((${NUM_SAMPLES} - 1))`
       do
-      
+
          echo ""
          echo "*************************"
-         echo "* PROCESSING SAMPLE " $(($i + 1)) 
+         echo "* PROCESSING SAMPLE " $(($i + 1))
          echo "*************************"
          echo ""
-      
+
          if [ $DATA == "DB" ]
          then
             bash $MARACAS/scripts/sample_processing.sh $DATA $PAIRED \
@@ -454,8 +461,8 @@ then
                                              $MARACAS/data/${MICROALGAE}/annotation/${MICROALGAE}.gtf \
                                              ${NUM_SAMPLES} \
                                              $WD/${MAIN_FOLDER} \
-                                             ${CONTROL_COND} \
-                                             ${EXPERIMENTAL_COND} \
+                                             ${CONTROL_CONDS} \
+                                             ${EXPERIMENTAL_CONDS} \
                                              ${FOLD_CHANGE} \
                                              ${Q_VALUE} \
                                              ${LOC_SAMPLES[$i]} \
@@ -485,24 +492,34 @@ then
          fi
    done
 
+
    if [ $MAPPER == "hisat2" -o  $MAPPER == "STAR" ]
-   then	
+   then
+	 echo "Merging transcriptome"
          bash $MARACAS/scripts/transcriptome_merging.sh $WD/${MAIN_FOLDER} $MARACAS/data/${MICROALGAE}/annotation/${MICROALGAE}.gtf
    fi
-   
+
    echo ""
-   echo "* Computing differential gene expression *" 
+   echo "* Computing differential gene expression *"
    echo "******************************************"
    echo ""
-   
-   Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_COND} ${EXPERIMENTAL_COND} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER $DEANALYSIS
-   
+   for i in `seq 0 1`
+   do
+        echo ${CONDITIONS[$i]}
+	echo ${CONTROL_CONDS[$i]}
+	echo ${EXPERIMENTAL_CONDS[$i]}
+	mkdir $WD/${MAIN_FOLDER}/results/comparison_by_${CONDITIONS[$i]}
+	Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_CONDS[$i]} ${EXPERIMENTAL_CONDS[$i]} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER $DEANALYSIS ${CONDITIONS[$i]}
+   done
    echo ""
-   echo "* Generating output reports *" 
+   echo "* Generating output reports *"
    echo "*****************************"
    echo ""
-   Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_report.Rmd', 'pdf_document')"
-   Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DE_report.Rmd', 'html_document')"
+   for i in `seq 0 $(($NUM_COMPS - 1))`
+   do
+	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/comparison_by_${CONDITIONS[$i]}/DE_report.Rmd', 'pdf_document')"
+	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/comparison_by_${CONDITIONS[$i]}/DE_report.Rmd', 'html_document')"
+   done
 fi
 
 echo ""
