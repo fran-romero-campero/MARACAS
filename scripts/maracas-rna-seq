@@ -509,7 +509,7 @@ then
 	echo ${CONTROL_CONDS[$i]}
 	echo ${EXPERIMENTAL_CONDS[$i]}
 	mkdir $WD/${MAIN_FOLDER}/results/comparison_by_${CONDITIONS[$i]}
-	Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_CONDS[$i]} ${EXPERIMENTAL_CONDS[$i]} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER $DEANALYSIS ${CONDITIONS[$i]}
+  Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_CONDS[$i]} ${EXPERIMENTAL_CONDS[$i]} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER $DEANALYSIS ${CONDITIONS[$i]}
    done
    echo ""
    echo "* Generating output reports *"

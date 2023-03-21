@@ -61,6 +61,7 @@ library(htmltools)
 # Load experimental design
 experimental.design <- read.csv("experimental_design.csv",as.is=T)
 experimental.design
+experimental.design$condition <- experimental.design[[condition]]
 number.samples <- nrow(experimental.design)
 
 ## Sort samples 
@@ -70,8 +71,8 @@ experimental.design <- experimental.design[indeces.sorted.samples,]
 experimental.design
 
 number.samples <- nrow(experimental.design)
-experimental.design[[condition]]
-number.replicates <- table(experimental.design[[condition]])
+experimental.design$condition
+number.replicates <- table(experimental.design$condition)
 number.replicates
 control.replicates <- number.replicates[[control.condition]]
 experimental.replicates <- number.replicates[[experimental.condition]]
@@ -84,12 +85,12 @@ j <- 1
 k <- 1
 for(i in 1:nrow(experimental.design))
 {
-  if(experimental.design[[condition]][i] == control.condition)
+  if(experimental.design$condition[i] == control.condition)
   {
     sample.labels[i] <- paste(control.condition,j,sep="_")
     control.indeces[j] <- i
     j <- j + 1
-  } else if (experimental.design[[condition]][i] == experimental.condition)
+  } else if (experimental.design$condition[i] == experimental.condition)
   {
     sample.labels[i] <- paste(experimental.condition,k,sep="_")
     experimental.indeces[k] <- i
@@ -319,7 +320,7 @@ fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 70),main = "")
 dev.off()
 
 png(filename = "../results/pca_analysis_2.png")
-fviz_pca_ind(res.pca, col.ind = experimental.design[[condition]], 
+fviz_pca_ind(res.pca, col.ind = experimental.design$condition, 
              pointsize=2, pointshape=21,fill="black",
              repel = TRUE, 
              addEllipses = TRUE,ellipse.type = "confidence",
@@ -819,10 +820,10 @@ htmlwidgets::saveWidget(as_widget(volcano_DEG), "../results/volcano_DEG.html")
 # ******************** REPORT *********************
 
 ## Generation of Rmd file for final report
-output.file <- paste0("../results/comparison_by_", comparison, "/DE_report.Rmd")
+output.file <- paste0("../results/comparison_by_", condition, "/DE_report.Rmd")
 
 ## Document header
-header <- paste0(paste0("# **Differential Gene Expression Report for ", microalgae), "in variable ",comparison ," conditions**")
+header <- paste0(paste0("# **Differential Gene Expression Report for ", microalgae), "in variable ", condition ," conditions**")
 
 ## Introduction test
 write(x = header,file = output.file,append = F)
@@ -848,7 +849,7 @@ number.samples <- nrow(experimental.design)
 for(i in 1:number.samples)
 {
   write(x = paste(c("* **", experimental.design$sample[i], "** for condition ",
-                    "**", experimental.design[[condition]][i], "**:"),collapse=""),file = output.file,
+                    "**", experimental.design$condition[i], "**:"),collapse=""),file = output.file,
         append = T)
   write(x=paste(c("[Quality Control analysis](../samples/",
                   experimental.design$sample[i],
