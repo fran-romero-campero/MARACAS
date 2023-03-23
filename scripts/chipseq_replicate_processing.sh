@@ -23,6 +23,7 @@ ARCH=${15}
 MICROALGAE=${16}
 HISTONE=${17}
 TF=${18}
+PEAK_CALLER=${19}
 
 REPLICATE_FOLDER=$WD/${MAIN_FOLDER}/replicates/replicate_${CURRENT_REPLICATE}
 
@@ -251,33 +252,51 @@ echo "****************"
 echo ""
 
 ## Peak calling 
-if [ $MODE == "histone_modification" ]
-then
 
-   if [ $CONTROL == "yes" ]
-   then
-      echo "Peak calling with control sample"
-      macs2 callpeak -t chip.bam -c control.bam -f BAM --outdir . -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
-   else
-      echo "Peak calling without control sample"
-      macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} --nomodel  &> macs_output
-   fi
-
-elif [ $MODE == "transcription_factor" ]
+if [ $PEAK_CALLER == "gem" ]
 then
-   if [ $CONTROL == "yes" ]
-   then
-      echo "Peak calling with control sample"
-      macs2 callpeak -t chip.bam -c control.bam -f BAM --outdir . -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
-   else
-      echo "Peak calling without control sample"
-      macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
-   fi
+  if [ $CONTROL == "yes" ]
+  then
+    echo "Peak calling with control sample"
+    java -Xmx4G -jar $MARACAS/scripts/gem.jar --d $MARACAS/scripts/Read_Distribution_default.txt \
+                --genome $MARACAS/data/$MICROALGAE/genome/${MICROALGAE}.fa.gz \
+                --expt chip.bam --ctrl control.bam --f SAM --out replicate_${CURRENT_REPLICATE} --k_min 6 --k_max 13
+  else
+    echo "Peak calling without control sample"
+    java -Xmx4G -jar $MARACAS/scripts/gem.jar --d $MARACAS/scripts/Read_Distribution_default.txt \
+                --genome $MARACAS/data/$MICROALGAE/genome/${MICROALGAE}.fa.gz \
+                --expt chip.bam --ctrl control.bam --f SAM --out replicate_${CURRENT_REPLICATE} --k_min 6 --k_max 13
+  fi
 
 else
-   echo "Incorrect value for MODE " $MODE
-   echo "Only histone_modification or transcription_factor are allowed"
-   exit
+  if [ $MODE == "histone_modification" ]
+  then
+
+     if [ $CONTROL == "yes" ]
+     then
+        echo "Peak calling with control sample"
+        macs2 callpeak -t chip.bam -c control.bam -f BAM --outdir . -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
+     else
+        echo "Peak calling without control sample"
+        macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} --nomodel  &> macs_output
+     fi
+
+  elif [ $MODE == "transcription_factor" ]
+  then
+     if [ $CONTROL == "yes" ]
+     then
+        echo "Peak calling with control sample"
+        macs2 callpeak -t chip.bam -c control.bam -f BAM --outdir . -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
+     else
+        echo "Peak calling without control sample"
+        macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
+     fi
+
+  else
+     echo "Incorrect value for MODE " $MODE
+     echo "Only histone_modification or transcription_factor are allowed"
+     exit
+  fi  
 fi
 
 # Remove bam files

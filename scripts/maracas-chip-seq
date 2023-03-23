@@ -36,7 +36,7 @@ echo "                    (__/ \__)                            "
 echo ""
 echo ""
 
-sleep 10s
+#sleep 10s
 
 echo "                                                          "
 if [ $# -ne 1 ];
@@ -89,6 +89,9 @@ INCLUDED_CONTROL=$(grep included_control: $PARAMS | awk '{ print $2 }')
 
 ## Load paired end data
 PAIRED=$(grep paired_end: $PARAMS | awk '{print $2}')
+
+## Load peak caller
+PEAK_CALLER=$(grep peak_caller: $PARAMS | awk '{print $2}')
 
 ## Load accession numbers for each sample o file location depending on data source
 if [ $DATA == "DB" ]
@@ -187,6 +190,7 @@ echo " - Number of replicates: " $NUM_REPLICATES
 echo " - Sample name: " ${SAMPLE_NAME}
 echo " - Microalgae: " $MICROALGAE
 echo " - Control Input/mock: " ${INCLUDED_CONTROL}
+echo " - Peak caller: " $PEAK_CALLER
 echo " - Architecture where script will be run: " $ARCH
 echo " - Number of processors: " $NPROC
 echo " - ChIP-seq data for a " $MODE 
@@ -438,7 +442,12 @@ then
                                          $(($i +1)) \
                                          $MODE \
                                          $NPROC \
-                                         $ARCH
+                                         $ARCH \
+                                         $MICROALGAE \
+                                         $HISTONE \
+                                         $TF \
+                                         $PEAK_CALLER
+                                         
       elif [ $DATA == "FILES" ] && [ $PAIRED == "TRUE" ]
       then
           bash $MARACAS/scripts/sample_processing.sh $DATA $PAIRED \
@@ -485,7 +494,7 @@ then
 #echo "NPROC=" $NPROC
 #echo "----------------------"
 
-
+   exit
 
    if [ $MODE == "histone_modification" ]
    then
