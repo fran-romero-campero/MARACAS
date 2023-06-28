@@ -147,7 +147,6 @@ if (mapper == "hisat2" || mapper == "STAR")
   write.table(gene.count, file = "../results/gene_count_matrix.csv", quote = F )
 }
 
-
 ## Scatter plots 
 
 scatterplot_function<-function(x,y)
@@ -177,7 +176,7 @@ scatterplot_function<-function(x,y)
                              "%"), collapse=""),size=4))
 }
 
-png(file="../results/scatter_plots.png",width = 1500,height = 1500)
+png(file= paste0("../results/DEGs_by_", condition, "/scatter_plots.png"),width = 1500,height = 1500)
 #par(mfrow=c(number.samples,number.samples))
 
 #for(i in 1:number.samples)
@@ -207,11 +206,12 @@ ggarrange(plotlist = myPlots, nrow = number.samples, ncol = number.samples)
 
 dev.off()
 
+print("Now boxplot before")
 ## Boxplot before normalization
 
 if(mapper == "hisat2" || mapper == "STAR")
 {
-  png(filename = "../results/boxplot_before_normalization.png")
+  png(filename = paste0("../results/DEGs_by_", condition, "/boxplot_before_normalization.png"))
 # boxplot(log2(gene.expression + 1),col=rainbow(ncol(gene.expression)),ylab="log2(FPKM + 1)",cex.lab=1.5,las=2,outline=F)
  print(ggplot(stack(as.data.frame(log2(gene.expression+1))), aes(x = ind, y = values, fill = ind)) +
         stat_boxplot(geom = 'errorbar') +
@@ -256,11 +256,11 @@ boxplot_before <- print(ggplot(stack(as.data.frame(log2(gene.expression+1))), ae
 
 
 	 boxplot_before<-ggplotly(boxplot_before)
-         htmlwidgets::saveWidget(as_widget(boxplot_before), "../results/boxplot_before.html")
+         htmlwidgets::saveWidget(as_widget(boxplot_before), paste0("../results/DEGs_by_", condition, "/boxplot_before.html"))
 
 }else if (mapper == "kallisto")
 {
-  png(filename = "../results/boxplot_before_normalization.png")
+  png(filename = paste0("../results/DEGs_by_", condition, "/results/boxplot_before_normalization.png"))
   # boxplot(log2(gene.expression + 1),col=rainbow(ncol(gene.expression)),ylab="log2(TPM + 1)",cex.lab=1.5,las=2,outline=F)
      print(ggplot(stack(as.data.frame(log2(gene.expression+1))), aes(x = ind, y = values, fill = ind)) +
           stat_boxplot(geom = 'errorbar') +
@@ -305,21 +305,21 @@ boxplot_before <- print(ggplot(stack(as.data.frame(log2(gene.expression+1))), ae
         ylab("Gene Expression"))
 
          boxplot_before<-ggplotly(boxplot_before)
-         htmlwidgets::saveWidget(as_widget(boxplot_before), "../results/boxplot_before.html")
+         htmlwidgets::saveWidget(as_widget(boxplot_before), paste0("../results/DEGs_by_", condition, "/boxplot_before.html"))
 
 }
 
-
+print("PCA")
 ## PCA analysis
 pca.gene.expression <- data.frame(colnames(gene.expression),t(gene.expression))
 colnames(pca.gene.expression)[1] <- "condition"
 
 res.pca <- PCA(pca.gene.expression, graph = FALSE,scale.unit = TRUE,quali.sup = 1 )
-png(filename = "../results/pca_analysis_1.png")
+png(filename = paste0("../results/DEGs_by_", condition, "/pca_analysis_1.png"))
 fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 70),main = "")
 dev.off()
 
-png(filename = "../results/pca_analysis_2.png")
+png(filename = paste0("../results/DEGs_by_", condition, "/pca_analysis_2.png"))
 fviz_pca_ind(res.pca, col.ind = experimental.design$condition, 
              pointsize=2, pointshape=21,fill="black",
              repel = TRUE, 
@@ -329,6 +329,7 @@ fviz_pca_ind(res.pca, col.ind = experimental.design$condition,
              show_legend=TRUE,show_guide=TRUE) 
 dev.off()
 
+print("Clustering")
 ## Hierarchical clustering
 #res.hcpc <- HCPC(res.pca, graph=FALSE)    
 
@@ -351,12 +352,15 @@ for(i in 1:ncol(gene.expression))
   gene.expression[,i] <- (gene.expression[,i] / upper.quantiles[i]) * mean.upper.quantiles
 }
 
+print("Log transformation")
 ## Log2 transformation
+
+
 log.gene.expression <- log2(gene.expression+1)
 
 if (mapper == "hisat2" || mapper == "STAR")
 {
-   png(filename = "../results/boxplot_after_normalization.png")
+   png(filename = paste0("../results/DEGs_by_", condition, "/boxplot_after_normalization.png"))
    # boxplot(log.gene.expression,col=rainbow(ncol(gene.expression)),ylab="log2(FPKM + 1)",cex.lab=1.5,outline=F,las=2,main="Normalized Gene Expression")
    print(ggplot(stack(as.data.frame(log.gene.expression)), aes(x = ind, y = values, fill = ind)) +
      stat_boxplot(geom = 'errorbar') +
@@ -401,12 +405,12 @@ boxplot_after <- print(ggplot(stack(as.data.frame(log.gene.expression)), aes(x =
 
 
   boxplot_after <- ggplotly(boxplot_after)
-  htmlwidgets::saveWidget(as.widget(boxplot_after), "../results/boxplot_after.html")
+  htmlwidgets::saveWidget(as.widget(boxplot_after), paste0("../results/DEGs_by_", condition, "/boxplot_after.html"))
 
 
 } else if (mapper == "kallisto")
 {
-   png(filename = "../results/boxplot_after_normalization.png")
+   png(filename = paste0("../results/DEGs_by_", condition, "/boxplot_after_normalization.png"))
    # boxplot(log.gene.expression,col=rainbow(ncol(gene.expression)),ylab="log2(TPM + 1)",cex.lab=1.5,outline=F,las=2,main="Normalized Gene Expression")
   print(ggplot(stack(as.data.frame(log.gene.expression)), aes(x = ind, y = values, fill = ind)) +
            stat_boxplot(geom = 'errorbar') +
@@ -450,7 +454,7 @@ boxplot_after <- print(ggplot(stack(as.data.frame(log.gene.expression)), aes(x =
 
 
   boxplot_after <- ggplotly(boxplot_after)
-  htmlwidgets::saveWidget(as.widget(boxplot_after), "../results/boxplot_after.html")
+  htmlwidgets::saveWidget(as.widget(boxplot_after), paste0("../results/DEGs_by_", condition, "/boxplot_after.html"))
 
 }
 
@@ -572,7 +576,7 @@ write(x = activated.genes, file = "../results/activated_genes.txt")
 write(x = repressed.genes, file = "../results/repressed_genes.txt")
 
 # Scatterplot DEGs
-png(filename = "../results/scatter_plot_control_vs_experimental.png")
+png(filename = paste0("../results/DEGs_by_", condition, "/scatter_plot_control_vs_experimental.png"))
 #  plot(control,experimental,pch=19,cex=0.7,col="grey",xlab=control.condition,ylab=experimental.condition,cex.lab=1.25)
 #  points(control[activated.genes],experimental[activated.genes],pch=19,cex=0.7,col="red")
 #  points(control[repressed.genes],experimental[repressed.genes],pch=19,cex=0.7,col="blue")
@@ -625,12 +629,12 @@ scatterplot_DEG <- ggplotly(scatterplot_DEG,x = ~control, y = ~experimental,
                             tooltip = "text",
                             width = 550, height = 600)
 
-htmlwidgets::saveWidget(as_widget(scatterplot_DEG), "../results/scatterplot_DEG.html")
+htmlwidgets::saveWidget(as_widget(scatterplot_DEG), paste0("../results/DEGs_by_", condition, "/scatterplot_DEG.html"))
 
 
 log10.qval <- -log10(q.values)
 
-png(filename = "../results/volcano_plot.png")
+png(filename = paste0("../results/DEGs_by_", condition, "/volcano_plot.png"))
 # plot(fold.change,log10.qval,pch=19,cex=0.7,col="grey", xlab="Fold Change", ylab="-log10(q-value)",cex.lab=1.5)
 # points(fold.change[activated.genes],log10.qval[activated.genes],cex=0.7,col="red",pch=19)
 # points(fold.change[repressed.genes],log10.qval[repressed.genes],cex=0.7,col="blue",pch=19)
@@ -676,7 +680,7 @@ volcano_DEG<-ggplotly(volcano_DEG,x = ~logFC, y = ~adj.P.Value,
                   tooltip = "text",
                   width = 450, height = 500)
 
-htmlwidgets::saveWidget(as_widget(volcano_DEG), "../results/volcano_DEG.html")
+htmlwidgets::saveWidget(as_widget(volcano_DEG), paste0("../results/DEGs_by_", condition, "/volcano_DEG.html"))
 
 
 
@@ -715,7 +719,7 @@ sds <- c(sd.control, sd.experimental)
 arrow.top <- means + sds
 arrow.bottom <- means - sds
 
-png(filename = "../results/barplot.png")
+png(filename = paste0("../results/DEGs_by_", condition, "/barplot.png"))
 xpos <- barplot(means,ylim=c(0,1.5*max(arrow.top)),col=c("red","blue"),names.arg = c(control.condition,experimental.condition),ylab="FPKM",cex.lab=1.5,main=gene,cex.main=2)
 arrows(xpos, arrow.top, xpos, arrow.bottom,code = 3,angle=90,length=0.1,lwd=1.5)
 points(rep(xpos[1],length(control.expr.vals))+0.1,control.expr.vals)
@@ -733,7 +737,7 @@ if ( DEanalysis == "DESeq2" )
 
 library(DESeq2)
 
-gene.count.matrix <- read.table(file = "../results/gene_count_matrix.csv",header = T,sep = ",")
+gene.count.matrix <- read.table(file = "../results/gene_count_matrix.csv", header = T, sep = ",")
 
 gene.ids <- gene.count.matrix$gene_id
 
@@ -760,14 +764,14 @@ repressed.genes <- row.names(de.results)[log.fold.change < - fc.threshold & q.va
 repressed.genes <- repressed.genes[!is.na(repressed.genes)]
 
 
-write.table(x = activated.genes, file = "../results/activated_genes.txt", quote = F, row.names = F, col.names = F)
-write.table(x = repressed.genes, file = "../results/repressed_genes.txt", quote = F, row.names = F, col.names = F)
+write.table(x = activated.genes, file = paste0("../results/DEGs_by_", condition, "/activated_genes.txt"), quote = F, row.names = F, col.names = F)
+write.table(x = repressed.genes, file = paste0("../results/DEGs_by_", condition, "/repressed_genes.txt"), quote = F, row.names = F, col.names = F)
 
 ## VOLCANO PLOT
 
 log10.qval <- -log10(q.values)
 
-png(filename = "../results/volcano_plot.png")
+png(filename = paste0("../results/DEGs_by_", condition, "/volcano_plot.png"))
 
 de.results[,"gene_type"] <- "ns"
 de.results[,"gene_name"] <- rownames(de.results)
@@ -810,20 +814,23 @@ volcano_DEG<-ggplotly(volcano_DEG,x = ~log2FoldChange, y = ~padj,
                   tooltip = "text",
                   width = 450, height = 500)
 
-htmlwidgets::saveWidget(as_widget(volcano_DEG), "../results/volcano_DEG.html")
+htmlwidgets::saveWidget(as_widget(volcano_DEG), paste0("../results/DEGs_by_", condition, "/volcano_DEG.html"))
 
 
 
 
 }
 
+print("Todo bien antes del report")
+
 # ******************** REPORT *********************
 
 ## Generation of Rmd file for final report
-output.file <- paste0("../results/comparison_by_", condition, "/DE_report.Rmd")
+output.file <- paste0("../results/DEGs_by_", condition, "/DE_report.Rmd")
 
 ## Document header
 header <- paste0(paste0("# **Differential Gene Expression Report for ", microalgae), "in variable ", condition ," conditions**")
+print("Definitions")
 
 ## Introduction test
 write(x = header,file = output.file,append = F)
@@ -843,6 +850,8 @@ intro.line <- paste(c("This report was automatically generated by **MARACAS
                       each sample:\n"), collapse="")
 write(x = intro.line,file = output.file,append = T)
 
+print("Todo bien con introduction")
+
 ## Experimental design
 number.samples <- nrow(experimental.design)
 
@@ -851,13 +860,13 @@ for(i in 1:number.samples)
   write(x = paste(c("* **", experimental.design$sample[i], "** for condition ",
                     "**", experimental.design$condition[i], "**:"),collapse=""),file = output.file,
         append = T)
-  write(x=paste(c("[Quality Control analysis](../samples/",
+  write(x=paste(c("[Quality Control analysis](../../samples/",
                   experimental.design$sample[i],
                   "/sample_1_fastqc.html), "), collapse=""), 
         file=output.file, append=T)
   if( mapper == "hisat2" || mapper == "STAR")
   {
-    write(x=paste(c("[BigWig file with mapping signal](../samples/",
+    write(x=paste(c("[BigWig file with mapping signal](../../samples/",
                     experimental.design$sample[i],"/sample.bw)"),
                   collapse=""), 
           file=output.file, append=T)
@@ -895,14 +904,16 @@ write(x = "\n",file=output.file, append=T)
 
 if (mapper == "hisat2" || mapper == "STAR")
 {
-   write(x="[**Click here to download a matrix in tab-separated value format containing estimates for gene expression computed from your RNA-seq data measured as FPKM. Rows represent genes and columns conditions.**](./gene_expression.tsv)", file=output.file, append=T)
+   write(x="[**Click here to download a matrix in tab-separated value format containing estimates for gene expression computed from your RNA-seq data measured as FPKM. Rows represent genes and columns conditions.**](../gene_expression.tsv)", file=output.file, append=T)
    write(x = "\n",file=output.file, append=T)
 }
 
 write(x="[**Click here to download a matrix in tab-separated value format containing estimates for gene expression computed from your RNA-seq data measured as TPM. Rows represent genes and columns conditions.**](./transcript_count_matrix.csv)", file=output.file, append=T)
 write(x = "\n",file=output.file, append=T)
-write(x="[**Click here to download a matrix in tab-separated value format containing estimates for gene expression computed from your RNA-seq data measured as raw read count. Rows represent genes and columns conditions.**](./gene_count_matrix.csv)", file=output.file, append=T)
+write(x="[**Click here to download a matrix in tab-separated value format containing estimates for gene expression computed from your RNA-seq data measured as raw read count. Rows represent genes and columns conditions.**](../gene_count_matrix.csv)", file=output.file, append=T)
 write(x = "\n",file=output.file, append=T)
+
+print("Todo bien con design")
 
 ## Global Gene Expression
 write(x = "\n", file=output.file, append=T)
@@ -925,6 +936,8 @@ write(x="A graphical representation of a **Principal Component Analysis (PCA)**
 write(x = "<center>", file=output.file, append=T)
 write(x = "![Principal Components Analysis](./pca_analysis_2.png){ width=50% }", file=output.file, append=T)
 write(x = "</center>", file=output.file, append=T)
+
+print("Todo bien con Gene Expr y PCA")
 
 ## Samples Scatter plots.
 write(x="Scatter plots comparing gene expression between samples is presented

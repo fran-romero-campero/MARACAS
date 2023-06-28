@@ -494,7 +494,6 @@ then
 #echo "NPROC=" $NPROC
 #echo "----------------------"
 
-   exit
 
    if [ $MODE == "histone_modification" ]
    then

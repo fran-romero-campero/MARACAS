@@ -153,12 +153,12 @@ then
 fi
 
 ## Load number of comparisons
-NUM_COMPS=$(grep conditions_name $PARAMS | wc -l)
+NUM_COMPS=$(grep factor_name $PARAMS | wc -l)
 
 ## Load conditions names
 for i in `seq 0 $((${NUM_COMPS} - 1))`
 do
-  CONDITIONS[$i]=$(grep conditions_name$(($i + 1)): $PARAMS | awk '{ print $2 }')
+  CONDITIONS[$i]=$(grep factor_name$(($i + 1)): $PARAMS | awk '{ print $2 }')
   CONTROL_CONDS[$i]=$(grep control_condition_name$(($i + 1)): $PARAMS | awk '{ print $2 }')
   EXPERIMENTAL_CONDS[$i]=$(grep experimental_condition_name$(($i + 1)): $PARAMS | awk '{ print $2 }')
 done
@@ -202,8 +202,8 @@ then
 	echo ${LOC_SAMPLES_RIGHT[@]}
 fi
 
-echo " - Number of comparisons: " $NUM_COMPS
-echo " - Comparisons names: " ${CONDITIONS[@]}
+echo " - Number of factors: " $NUM_COMPS
+echo " - Factor names: " ${CONDITIONS[@]}
 echo " - Control conditions names: " ${CONTROL_CONDS[@]}
 echo " - Experimental conditions names: " ${EXPERIMENTAL_CONDS[@]} 
 echo "---------------------------------------------------"
@@ -258,7 +258,7 @@ do
    EXPERIMENTAL_DESIGN=()
    for j in `seq 1 ${NUM_COMPS}`
    do
-      EXPERIMENTAL_DESIGN[$(($j -1))]=$(grep condition${j}_sample$(($i + 1)): $FIRST_FOLDER/$PARAMS | awk '{ print $2 }')
+      EXPERIMENTAL_DESIGN[$(($j -1))]=$(grep factor${j}_sample$(($i + 1)): $FIRST_FOLDER/$PARAMS | awk '{ print $2 }')
    done
    echo "sample"_$(($i + 1)) ${EXPERIMENTAL_DESIGN[@]} >> experimental_design_naive.csv
 done
@@ -508,8 +508,8 @@ then
         echo ${CONDITIONS[$i]}
 	echo ${CONTROL_CONDS[$i]}
 	echo ${EXPERIMENTAL_CONDS[$i]}
-	mkdir $WD/${MAIN_FOLDER}/results/comparison_by_${CONDITIONS[$i]}
-  Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_CONDS[$i]} ${EXPERIMENTAL_CONDS[$i]} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER $DEANALYSIS ${CONDITIONS[$i]}
+	mkdir $WD/${MAIN_FOLDER}/results/DEGs_by_${CONDITIONS[$i]}
+        Rscript $MARACAS/scripts/DE_analysis.R $WD/${MAIN_FOLDER}/samples ${CONTROL_CONDS[$i]} ${EXPERIMENTAL_CONDS[$i]} $FOLD_CHANGE $Q_VALUE $MICROALGAE $MAPPER $DEANALYSIS ${CONDITIONS[$i]}
    done
    echo ""
    echo "* Generating output reports *"
@@ -517,8 +517,8 @@ then
    echo ""
    for i in `seq 0 $(($NUM_COMPS - 1))`
    do
-	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/comparison_by_${CONDITIONS[$i]}/DE_report.Rmd', 'pdf_document')"
-	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/comparison_by_${CONDITIONS[$i]}/DE_report.Rmd', 'html_document')"
+	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DEGs_by_${CONDITIONS[$i]}/DE_report.Rmd', 'pdf_document')"
+	Rscript -e "rmarkdown::render('$WD/${MAIN_FOLDER}/results/DEGs_by_${CONDITIONS[$i]}/DE_report.Rmd', 'html_document')"
    done
 fi
 

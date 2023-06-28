@@ -43,7 +43,7 @@ elif [ $DATA == "FILES" ] && [ $PAIRED == "TRUE" ]
 then
 	cp ${FASTQ_LEFT} sample_1.fastq.gz
 	cp ${FASTQ_RIGHT} sample_2.fastq.gz
-	ACC_NUMBER=sample 
+	ACC_NUMBER=sample
 fi
 
 ## Sample quality control and read mapping to reference genome
@@ -110,7 +110,7 @@ echo ${SAMPLE_FOLDER}/${ACC_NUMBER}.gtf >> ../../results/merge_list.txt
 
 ## Gene Expression Quantification
 stringtie -p $NPROC -e -B -G $ANNOTATION -o ${ACC_NUMBER}.gtf ${ACC_NUMBER}.bam
-rm ${ACC_NUMBER}.bam
+#rm ${ACC_NUMBER}.bam
 
 sed -i 's/#/HHAASSHH/g' t_data.ctab
 

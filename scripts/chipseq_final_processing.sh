@@ -68,6 +68,10 @@ else
    cp $WD/${MAIN_FOLDER}/replicates/replicate_1/replicate_1_peaks.narrowPeak $WD/${MAIN_FOLDER}/results/output_peaks.narrowPeak
 fi
 
+## MOTIFS FINDING WITH HOMER
+findMotifsGenome.pl output_peaks.narrowPeak $MARACAS/data/$MICROALGAE/genome/$MICROALGAE.fa ./output_motifs -size 200 -len 6
+
+
 if [ $MODE == "histone_modification" ]
 then
    Rscript $MARACAS/scripts/create_Rmd.R $WD/${MAIN_FOLDER}/results/ChIP_seq_analysis_report.Rmd $MICROALGAE $MODE $HISTONE ${NUM_REPLICATES} ${INCLUDED_CONTROL}

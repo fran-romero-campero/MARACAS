@@ -258,13 +258,12 @@ then
   if [ $CONTROL == "yes" ]
   then
     echo "Peak calling with control sample"
-    java -Xmx4G -jar $MARACAS/scripts/gem.jar --d $MARACAS/scripts/Read_Distribution_default.txt \
-                --genome $MARACAS/data/$MICROALGAE/genome/${MICROALGAE}.fa.gz \
-                --expt chip.bam --ctrl control.bam --f SAM --out replicate_${CURRENT_REPLICATE} --k_min 6 --k_max 13
+    java -jar $MARACAS/scripts/gem.jar --t $NPROC --d $MARACAS/scripts/Read_Distribution_default.txt --genome $MARACAS/data/$MICROALGAE/genome/gem_genome --expt chip.bam --ctrl control.bam --f SAM --out replicate_${CURRENT_REPLICATE} --k 6 --k_win 200
+
   else
     echo "Peak calling without control sample"
     java -Xmx4G -jar $MARACAS/scripts/gem.jar --d $MARACAS/scripts/Read_Distribution_default.txt \
-                --genome $MARACAS/data/$MICROALGAE/genome/${MICROALGAE}.fa.gz \
+                --genome $MARACAS/data/$MICROALGAE/genome/${MICROALGAE}.fa \
                 --expt chip.bam --ctrl control.bam --f SAM --out replicate_${CURRENT_REPLICATE} --k_min 6 --k_max 13
   fi
 
@@ -278,7 +277,7 @@ else
         macs2 callpeak -t chip.bam -c control.bam -f BAM --outdir . -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
      else
         echo "Peak calling without control sample"
-        macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} --nomodel  &> macs_output
+        macs2 callpeak -t chip.bam -f BAM --outdir. -n replicate_${CURRENT_REPLICATE} --nomodel &> macs_output
      fi
 
   elif [ $MODE == "transcription_factor" ]
@@ -307,6 +306,8 @@ echo "************************"
 echo "* PEAK CALLING DONE !!!*"
 echo "************************"
 echo ""
+
+exit
 
 if [ $ARCH == "SLURM" ]
 then
