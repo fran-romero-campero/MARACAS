@@ -38,7 +38,7 @@ control.condition
 experimental.condition <- args[3]
 experimental.condition
 fc.threshold <- as.numeric(args[4])
-q.val.threshold <- as.numeric(args[5])
+q.val.threshold <- 10^-as.numeric(args[5])
 microalgae <- args[6]
 mapper <- args[7]
 DEanalysis <- args[8]
@@ -572,8 +572,8 @@ repressed.genes <- genes.ids[fold.change < - log2(fc.threshold) & q.values < q.v
 length(activated.genes)
 length(repressed.genes)
 
-write(x = activated.genes, file = "../results/activated_genes.txt")
-write(x = repressed.genes, file = "../results/repressed_genes.txt")
+write.table(x = activated.genes, file = paste0("../results/DEGs_by_", condition, "/activated_genes.txt"), quote = F, row.names = F, col.names = F)
+write.table(x = repressed.genes, file = paste0("../results/DEGs_by_", condition, "/repressed_genes.txt"), quote = F, row.names = F, col.names = F)
 
 # Scatterplot DEGs
 png(filename = paste0("../results/DEGs_by_", condition, "/scatter_plot_control_vs_experimental.png"))

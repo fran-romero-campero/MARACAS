@@ -155,6 +155,7 @@ fi
 ## Load number of comparisons
 NUM_COMPS=$(grep factor_name $PARAMS | wc -l)
 
+
 ## Load conditions names
 for i in `seq 0 $((${NUM_COMPS} - 1))`
 do
@@ -503,7 +504,7 @@ then
    echo "* Computing differential gene expression *"
    echo "******************************************"
    echo ""
-   for i in `seq 0 1`
+   for i in `seq 0 $(($NUM_COMPS - 1))`
    do
         echo ${CONDITIONS[$i]}
 	echo ${CONTROL_CONDS[$i]}

@@ -10,6 +10,8 @@ mode <- args[3] #"histone_modification"
 name <- args[4] #"H3K4me3"
 number.replicates <- as.numeric(args[5]) #2
 included.control <- args[6] #"yes"
+peak.caller <- args[7] #"gem"
+peak.caller
 
 if(mode == "histone_modification")
 {
@@ -20,7 +22,7 @@ if(mode == "histone_modification")
   mode.header <- "Transcription Factor"
   mode.intro <- "transcription factor"
 }
-
+print("header")
 ## Document header
 header <- paste0(paste(c("# **ChIP-seq Data Analysis for the",
                          mode.header, name,
@@ -106,25 +108,46 @@ write(x = paste(c("## Identification of the Genomic loci occupied by the ",
                 collapse=""), file = output.file, append = T)
 
 write(x = "\n", file=output.file, append=T)
+
+if(peak.caller == "macs2")
+{
 write(x=paste(c("The genomic loci occupied by", name,  "were determined using 
       [macs2](https://pypi.org/project/MACS2/). Click on the links
       below to access for each replicate the complete macs2 logs, the mapping signal
       in bigWig format and the identified occupied genomic loci:\n"),collapse=" "), file=output.file, append=T)
+}
+if(peak.caller == "gem")
+{
+    write(x=paste(c("The genomic loci occupied by", name,  "were determined using 
+      GEM. Click on the links
+      below to access for each replicate the mapping signal
+      in bigWig format and the identified occupied genomic loci:\n"),collapse=" "), file=output.file, append=T)
+}
+
 
 for(i in 1:number.replicates)
 {
   write(x = paste(c("* **Replicate",
                     i, "**:\n"),collapse=""),file = output.file,
         append = T)
+  if(peak.caller == "macs2")
+  {
   write(x=paste(c("\t[Macs2 log](../replicates/replicate_",i,
                   "/macs_output)\n "),collapse=""), 
         file=output.file, append=T)
+  }
   write(x=paste(c("\t[Bigwig file with mapping signal](../replicates/replicate_",i,
                   "/chip_", i, ".bw )\n "),collapse=""), 
         file=output.file, append=T)
   write(x=paste(c("\t[Occupied Genomic loci in BED format](../replicates/replicate_",i,
                   "/replicate_",i,"_peaks.narrowPeak)\n "),collapse=""), 
         file=output.file, append=T)
+  if(peak.caller == "gem")
+  {
+      write(x=paste(c("\t[DNA binding motifs founded using GEM tool](../replicates/replicate_", i,
+                      "/out/out.results.htm)\n "), collapse=""),
+               file=output.file, append=T)
+  }
   write(x = "\n",file=output.file, append=T)
 }
 
@@ -145,3 +168,14 @@ if(number.replicates > 1)
   write(x=paste(c("* **[Genomic loci Occupied by ", name, " in BED format](./output_peaks.narrowPeak)**\n "),collapse=""), 
         file=output.file, append=T)
 }
+
+if(peak.caller == "macs2")
+{
+  write(x="DNA motifs found by HOMER are also provided in extra HTML files.\n",
+        file=output.file, append=T)
+  write(x=paste(c("* **[DNA known motifs founded for ", name, " using HOMER tool](output_motifs/knownResults.html)**\n "), collapse=""),
+        file=output.file, append=T)
+  write(x=paste(c("* **[DNA de novo motifs founded for ", name, " using HOMER tool](output_motifs/homerResults.html)**\n "), collapse=""),
+        file=output.file, append=T)
+}
+

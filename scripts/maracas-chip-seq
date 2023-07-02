@@ -76,9 +76,9 @@ eval WD=$(grep working_directory: $PARAMS | awk '{ print $2 }')
 MAIN_FOLDER=$(grep main_folder: $PARAMS | awk '{ print $2 }')
 
 ## Load number of replicates
-NUM_REPLICATES=$(grep number_of_replicates: $PARAMS | awk '{ print $2 }')
+NUM_REPLICATES=$(grep chip_replicate $PARAMS | wc -l )
 
-## Load sample name 
+## Load sample name
 SAMPLE_NAME=$(grep sample_name: $PARAMS | awk '{ print $2 }')
 
 ## Load microalgae
@@ -92,6 +92,13 @@ PAIRED=$(grep paired_end: $PARAMS | awk '{print $2}')
 
 ## Load peak caller
 PEAK_CALLER=$(grep peak_caller: $PARAMS | awk '{print $2}')
+echo $PEAK_CALLER
+
+## Load DNA motifs finding parameters
+KMIN=$(grep k_min: $PARAMS | awk '{print $2}')
+KMAX=$(grep k_max: $PARAMS | awk '{print $2}')
+KWINDOW=$(grep k_window: $PARAMS | awk '{print $2}')
+
 
 ## Load accession numbers for each sample o file location depending on data source
 if [ $DATA == "DB" ]
@@ -428,6 +435,14 @@ then
                                          $MODE \
                                          $NPROC\
                                          $ARCH
+                                         $MICROALGAE \
+                                         $HISTONE \
+                                         $TF \
+                                         ${PEAK_CALLER}\
+                                         $KMIN\
+                                         $KMAX\
+                                         $KWINDOW
+                                         
      elif [ $DATA == "FILES" ] && [ $PAIRED == "FALSE" ]
      then
          bash $MARACAS/scripts/chipseq_replicate_processing.sh $DATA $PAIRED \
@@ -446,7 +461,10 @@ then
                                          $MICROALGAE \
                                          $HISTONE \
                                          $TF \
-                                         $PEAK_CALLER
+                                         ${PEAK_CALLER}\
+                                         $KMIN\
+                                         $KMAX\
+                                         $KWINDOW
                                          
       elif [ $DATA == "FILES" ] && [ $PAIRED == "TRUE" ]
       then
@@ -465,6 +483,13 @@ then
                                          $MODE \
                                          $NPROC \
                                          $ARCH
+                                         $MICROALGAE \
+                                         $HISTONE \
+                                         $TF \
+                                         ${PEAK_CALLER}\
+                                         $KMIN\
+                                         $KMAX\
+                                         $KWINDOW
       fi
 
       echo ""
@@ -494,17 +519,18 @@ then
 #echo "NPROC=" $NPROC
 #echo "----------------------"
 
-
    if [ $MODE == "histone_modification" ]
    then
       bash $MARACAS/scripts/chipseq_final_processing.sh $WD ${MAIN_FOLDER} ${NUM_REPLICATES} \
                                                        $MODE $MICROALGAE $HISTONE $HISTONE \
-                                                       ${INCLUDED_CONTROL} $NPROC
+                                                       ${INCLUDED_CONTROL} $NPROC ${PEAK_CALLER}\
+                                                       $KMIN $KMAX $KWINDOW
    elif [ $MODE == "transcription_factor" ]
    then
       bash $MARACAS/scripts/chipseq_final_processing.sh $WD ${MAIN_FOLDER} ${NUM_REPLICATES} \
                                                        $MODE $MICROALGAE $TF $TF \
-                                                       ${INCLUDED_CONTROL} $NPROC
+                                                       ${INCLUDED_CONTROL} $NPROC ${PEAK_CALLER}\
+                                                       $KMIN $KMAX $KWINDOW
    fi
 fi
 

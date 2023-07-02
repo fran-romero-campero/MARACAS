@@ -24,6 +24,10 @@ MICROALGAE=${16}
 HISTONE=${17}
 TF=${18}
 PEAK_CALLER=${19}
+echo ${PEAK_CALLER}
+KMIN=${20}
+KMAX=${21}
+KWINDOW=${22}
 
 REPLICATE_FOLDER=$WD/${MAIN_FOLDER}/replicates/replicate_${CURRENT_REPLICATE}
 
@@ -253,18 +257,17 @@ echo ""
 
 ## Peak calling 
 
-if [ $PEAK_CALLER == "gem" ]
+if [ ${PEAK_CALLER} == "gem" ]
 then
   if [ $CONTROL == "yes" ]
   then
     echo "Peak calling with control sample"
-    java -jar $MARACAS/scripts/gem.jar --t $NPROC --d $MARACAS/scripts/Read_Distribution_default.txt --genome $MARACAS/data/$MICROALGAE/genome/gem_genome --expt chip.bam --ctrl control.bam --f SAM --out replicate_${CURRENT_REPLICATE} --k 6 --k_win 200
-
+    java -jar $MARACAS/scripts/gem.jar --t $NPROC --d $MARACAS/scripts/Read_Distribution_default.txt --genome $MARACAS/data/$MICROALGAE/genome/gem_genome --expt chip.bam --ctrl control.bam --f SAM --outBED --k_min $KMIN --k_max $KMAX --k_win $KWINDOW
+    cp out/out.GEM_events.bed replicate_${CURRENT_REPLICATE}_peaks.narrowPeak
   else
     echo "Peak calling without control sample"
-    java -Xmx4G -jar $MARACAS/scripts/gem.jar --d $MARACAS/scripts/Read_Distribution_default.txt \
-                --genome $MARACAS/data/$MICROALGAE/genome/${MICROALGAE}.fa \
-                --expt chip.bam --ctrl control.bam --f SAM --out replicate_${CURRENT_REPLICATE} --k_min 6 --k_max 13
+    java -jar $MARACAS/scripts/gem.jar --t $NPROC --d $MARACAS/scripts/Read_Distribution_default.txt --genome $MARACAS/data/$MICROALGAE/genome/gem_genome --expt chip.bam --f SAM --outBED --k_min $KMIN --k_max $KMAX --k_win $KWINDOW
+    cp out/out.GEM_events.bed replicate_${CURRENT_REPLICATE}_peaks.narrowPeak
   fi
 
 else
@@ -324,12 +327,12 @@ then
       then
          sbatch $MARACAS/scripts/chipseq_final_processing.sh $WD ${MAIN_FOLDER} ${NUM_REPLICATES} \
                                                           $MODE $MICROALGAE $HISTONE $HISTONE \
-                                                          $CONTROL $NPROC
+                                                          $CONTROL $NPROC ${PEAK_CALLER}
       elif [ $MODE == "transcription_factor" ]
       then
          sbatch $MARACAS/scripts/chipseq_final_processing.sh $WD ${MAIN_FOLDER} ${NUM_REPLICATES} \
                                                           $MODE $MICROALGAE $TF $TF \
-                                                          $CONTROL $NPROC
+                                                          $CONTROL $NPROC ${PEAK_CALLER}
       fi
    fi
 fi

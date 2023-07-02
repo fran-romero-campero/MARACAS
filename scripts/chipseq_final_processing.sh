@@ -9,6 +9,10 @@ HISTONE=$6
 TF=$7
 INCLUDED_CONTROL=$8
 NPROC=$9
+PEAK_CALLER=${10}
+KMIN=${11}
+KMAX=${12}
+KWINDOW=${13}
 
 echo "------------------------"
 echo "WD=" $WD
@@ -20,6 +24,7 @@ echo "HISTONE=" $HISTONE
 echo "TF=" $TF
 echo "INCLUDED_CONTROL=" ${INCLUDED_CONTROL}
 echo "NPROC=" $NPROC
+echo "PEAK_CALLER=" ${PEAK_CALLER}
 echo "----------------------"
 
 echo ""
@@ -69,15 +74,23 @@ else
 fi
 
 ## MOTIFS FINDING WITH HOMER
-findMotifsGenome.pl output_peaks.narrowPeak $MARACAS/data/$MICROALGAE/genome/$MICROALGAE.fa ./output_motifs -size 200 -len 6
 
+if [ ${PEAK_CALLER} == "macs2" ]
+then
+  findMotifsGenome.pl output_peaks.narrowPeak $MARACAS/data/$MICROALGAE/genome/$MICROALGAE.fa ./output_motifs -size $KWINDOW -len `seq -s, $KMIN $KMAX`
+else
 
+  echo "adios"
+  exit
+fi
+
+## RESULTS REPORT
 if [ $MODE == "histone_modification" ]
 then
-   Rscript $MARACAS/scripts/create_Rmd.R $WD/${MAIN_FOLDER}/results/ChIP_seq_analysis_report.Rmd $MICROALGAE $MODE $HISTONE ${NUM_REPLICATES} ${INCLUDED_CONTROL}
+   Rscript $MARACAS/scripts/create_Rmd.R $WD/${MAIN_FOLDER}/results/ChIP_seq_analysis_report.Rmd $MICROALGAE $MODE $HISTONE ${NUM_REPLICATES} ${INCLUDED_CONTROL} ${PEAK_CALLER}
 elif [ $MODE == "transcription_factor" ]
 then
-   Rscript $MARACAS/scripts/create_Rmd.R $WD/${MAIN_FOLDER}/results/ChIP_seq_analysis_report.Rmd $MICROALGAE $MODE $TF ${NUM_REPLICATES} ${INCLUDED_CONTROL}
+   Rscript $MARACAS/scripts/create_Rmd.R $WD/${MAIN_FOLDER}/results/ChIP_seq_analysis_report.Rmd $MICROALGAE $MODE $TF ${NUM_REPLICATES} ${INCLUDED_CONTROL} ${PEAK_CALLER}
 fi
 
 # Add rmarkdown dependency
