@@ -70,6 +70,7 @@ then
                  --outFileFormat bigwig 
    
 else
+  echo "copying replicate_1_peaks.narrowPeak into results folder"
    cp $WD/${MAIN_FOLDER}/replicates/replicate_1/replicate_1_peaks.narrowPeak $WD/${MAIN_FOLDER}/results/output_peaks.narrowPeak
 fi
 
@@ -77,11 +78,8 @@ fi
 
 if [ ${PEAK_CALLER} == "macs2" ]
 then
-  findMotifsGenome.pl output_peaks.narrowPeak $MARACAS/data/$MICROALGAE/genome/$MICROALGAE.fa ./output_motifs -size $KWINDOW -len `seq -s, $KMIN $KMAX`
-else
+  findMotifsGenome.pl $WD/${MAIN_FOLDER}/results/output_peaks.narrowPeak $MARACAS/data/$MICROALGAE/genome/$MICROALGAE.fa $WD/${MAIN_FOLDER}/results/output_motifs -size $KWINDOW -len `seq -s, $KMIN $KMAX`
 
-  echo "adios"
-  exit
 fi
 
 ## RESULTS REPORT
