@@ -42,12 +42,15 @@ MARACAS requires the following dependencies that need to be previously installed
 
 * [FASTQC: A quality control tool for high throughput sequence data](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 * [HISAT2: graph-based alignment of next generation sequencing reads to a population of genomes](http://daehwankimlab.github.io/hisat2/)
+* [STAR: Spliced Transcripts Alignment to a Reference](https://github.com/alexdobin/STAR)
 * [Kallisto: RNA-seq quantification tool that is faster and achieves similar accuracy](http://pachterlab.github.io/kallisto/)
 * [Bowtie 2: an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 * [Samtools: Reading/writing/editing/indexing/viewing SAM/BAM/CRAM format](http://www.htslib.org/)
 * [deepTools: tools for exploring deep sequencing data](https://deeptools.readthedocs.io/en/develop/index.html)
 * [StringTie: Transcript assembly and quantification for RNA-Seq](https://ccb.jhu.edu/software/stringtie/)
 * [MACS2: Model-based Analysis for ChIP-Seq](https://pypi.org/project/MACS2/)
+* [HOMER: Hypergeometric Optimization of Motif EnRichment](http://homer.ucsd.edu/homer/download.html)
+* [GEM: Genome wide Event finding and Motif discovery](https://groups.csail.mit.edu/cgs/gem/)
 * [R: free software environment for statistical computing and graphics with the following packages:](https://www.r-project.org/)
     * [ballgown: Tools for statistical analysis of assembled transcriptomes, including flexible differential expression analysis, visualization of transcript structures, and matching of assembled transcripts to annotation.](https://www.bioconductor.org/packages/release/bioc/html/ballgown.html)
     * [FactoMineR: an R package dedicated to multivariate Exploratory Data Analysis.](http://factominer.free.fr/)
@@ -57,9 +60,11 @@ MARACAS requires the following dependencies that need to be previously installed
     * [plotly: Create Interactive Web Graphics via 'plotly.js'](https://cran.r-project.org/web/packages/plotly/index.html)
     * [ggpubr: 'ggplot2' Based Publication Ready Plots](https://cran.r-project.org/web/packages/ggpubr/index.html)
     * [limma: Linear Models for Microarray and RNA-seq Data](https://bioconductor.org/packages/release/bioc/html/limma.html)
+    * [DESeq2: Differential gene expression analysis based on the negative binomial distribution](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
     * [rmarkdown: Dynamic Documents for R, Convert R Markdown documents into a variety of formats.](https://cran.r-project.org/web/packages/rmarkdown/index.html)
 * [TeX Live: TeX document production system](https://www.tug.org/texlive/)
 
+STAR genomes indices requires high computational space and cannot be donwloaded when clonning MARACAS repository. They are available at ...
 
 To install MARACAS you do NOT need sudo/administrator permissions just follow these steps:
 
@@ -136,16 +141,18 @@ RNA-seq data was generated. It can take one the following exact names:
     * phaeodactylum_tricornutum
     * nannochloropsis_gaditana
 
+* **DEanalysis_package:** This parameter specifies the R package to perform differential expression analysis. Two options are provided limma and DESeq2. The default value is DESeq2.
+
 * **read mapper:** This parameters specifies the software tool to perform read mapping. Two different options are provided HISAT2 and Kallisto. The default value is HISAT2. Please, be aware that Kallisto cannot be use for the microalgae *Mesotaenium endlicherianum*, *Spirogloea muscicola*, *Coccomyxa subellipsoidea*, *Haematococcus lacustris* or *Raphidocelis subcapitata*
 
 * **main_folder:** This parameter specifies the name of the folder where the 
 final and intermediary results of the analysis will be saved. 
 
-* **number_of_samples:** This parameter specifies the total number of samples to be analyzed. 
+* **factor_nameM:** This parameter specifies the name of the factor M, where M=1,...,number of factors.
 
-* **control_condition_name:** This parameter specifies the name of the control condition.
+* **control_condition_nameM:** This parameter specifies the name of the control condition for factorM, where M=1,...,number of factors.
 
-* **experimental_condition_name:** This parameter specifies the name of the experimental condition.
+* **experimental_condition_nameM:** This parameter specifies the name of the experimental condition for factorM, where M=1,...,number of factors.
 
 * **loc_sampleN:** In the case of single end data (*paired_end: FALSE*) and when the data to be processed are stored in your computer in fastq format (*data_source: FILES*) this parameter specifies the path and file name of sampleN where N=1,...,number_of_samples.
 
@@ -155,7 +162,7 @@ final and intermediary results of the analysis will be saved.
 
 * **loc_sample_rightN:** In the case of paired end data (*paired_end: TRUE*) and when the data to be processed are stored in your computer in fastq format (*data_source: FILES*) this parameter specifies the path and name of the fastq file containing the right reads for sampleN where N=1,...,number_of_samples.
 
-* **condition_sample1:** This parameter specifies for each sampleN where N=1,...,number_of_samples the condition name to which it corresponds. The condition name has to be one of the names specified in the previous parameters *control_condition_name* or *experimental_condition_name*. 
+* **factorM_sampleN:** This parameter specifies for each sampleN and factorM (where N=1,...,number_of_samples and M=1,...,number of factors) the condition name to which it corresponds. The condition name has to be one of the names specified in the previous parameters *control_condition_nameM* or *experimental_condition_nameM*. 
 
 * **fold_change:** This parameter specifies the fold-change used to determine differential expressed genes in the experimental condition when compared to the control condition. 
 
@@ -178,6 +185,14 @@ The parameters **data_source:**, **cluster:**, **number_processors:**, **working
 Next the specific parameters for a ChIP-seq analysis are listed:
 
 * **included_control:** This parameter can take the values *yes* or *no* depending whether or not your experimental design includes a control condition such as an input, mock or similar. 
+
+* **peak_caller:** This parameters specifies the software tool to perform peak calling. Two different options are provided macs2 and gem.
+
+* **k_min:** This parameters specifies the minimum length for DNA motifs to be found.
+
+* **k_min:** This parameters specifies the maximum length for DNA motifs to be found.
+
+* **k_window:** This parameters specifies the DNA fragment size around detected peaks for DNA motifs finding.
 
 * **mode:** This parameter can take the values *transcription_factor* or *histone_modification* to specify if your ChIP-seq data was generated for a transcription factor or a histone modification. 
 
